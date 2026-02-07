@@ -10,15 +10,16 @@ import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.Objects;
 
-//Immutable Aggreagte 
+//Immutable Aggreagte
+// Fixed: Added final tags
 public class Transaction extends BaseAggregateRoot<TransactionId> {
-    private AccountId sourceAccountId;
-    private AccountId targetAccountId;
-    private Money amount;
-    private TransactionType type;
-    private TransactionStatus status;
-    private String description;
-    private Instant timestamp;
+    private final AccountId sourceAccountId;
+    private final AccountId targetAccountId;
+    private final Money amount;
+    private final TransactionType type;
+    private final TransactionStatus status;
+    private final String description;
+    private final Instant timestamp;
 
     private Transaction(TransactionId transactionId, AccountId sourceAccountId, AccountId targetAccountId,
                         Money amount, TransactionType type, TransactionStatus status,

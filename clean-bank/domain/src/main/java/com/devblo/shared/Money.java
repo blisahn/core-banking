@@ -11,9 +11,9 @@ public record Money(BigDecimal amount, Currency currency) implements ValueObject
     public Money {
         Objects.requireNonNull(currency, "Currency cannot be null");
         Objects.requireNonNull(amount, "Amount cannot be null");
-
         if (amount.compareTo(BigDecimal.ZERO) < 0)
             throw new IllegalArgumentException("Amount cannot be negative: " + amount);
+        amount = amount.setScale(2);
     }
 
 
@@ -69,6 +69,10 @@ public record Money(BigDecimal amount, Currency currency) implements ValueObject
 
     public boolean isZero() {
         return this.amount.compareTo(BigDecimal.ZERO) == 0;
+    }
+
+    public boolean isNegative() {
+        return this.amount.compareTo(BigDecimal.ZERO) < 0;
     }
 
     private void validateSameCurrency(Money other) {
