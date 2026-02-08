@@ -22,6 +22,15 @@ public record AccountNumber(String value) implements ValueObject {
         return new AccountNumber(value);
     }
 
+    public static AccountNumber generate() {
+        // TR + 24 digits
+        StringBuilder sb = new StringBuilder("TR");
+        for (int i = 0; i < 24; i++) {
+            sb.append((int) (Math.random() * 10));
+        }
+        return new AccountNumber(sb.toString());
+    }
+
     public String getBankCode() {
         return value.substring(4, 9);
     }

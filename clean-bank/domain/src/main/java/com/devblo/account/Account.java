@@ -42,6 +42,26 @@ public class Account extends BaseAggregateRoot<AccountId> {
         this.status = status;
     }
 
+
+    /***
+     *
+     * @param id
+     * @param accountnumber
+     * @param customerId
+     * @param balance
+     * @param type
+     * @param status
+     * @param createdAt
+     * @param updatedAt
+     * @return a new account for retrieving from db
+     */
+    public static Account reconstitute(AccountId id, AccountNumber accountnumber,
+                                       CustomerId customerId, Money balance,
+                                       AccountType type, AccountStatus status,
+                                       Instant createdAt, Instant updatedAt) {
+        return new Account(id, accountnumber, customerId, balance, type, status, createdAt, updatedAt);
+    }
+
     /**
      *
      * @param accountNumber
@@ -72,25 +92,6 @@ public class Account extends BaseAggregateRoot<AccountId> {
         account.registerEvent(new AccountOpenedEvent(id, type, customerId, currency));
 
         return account;
-    }
-
-    /***
-     *
-     * @param id
-     * @param accountnumber
-     * @param customerId
-     * @param balance
-     * @param type
-     * @param status
-     * @param createdAt
-     * @param updatedAt
-     * @return a new account for retrieving from db
-     */
-    public static Account reconstitute(AccountId id, AccountNumber accountnumber,
-                                       CustomerId customerId, Money balance,
-                                       AccountType type, AccountStatus status,
-                                       Instant createdAt, Instant updatedAt) {
-        return new Account(id, accountnumber, customerId, balance, type, status, createdAt, updatedAt);
     }
 
     // BUSINESS METHODS

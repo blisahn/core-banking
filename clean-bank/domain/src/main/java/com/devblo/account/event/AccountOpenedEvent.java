@@ -23,7 +23,6 @@ public class AccountOpenedEvent extends BaseDomainEvent {
         this.customerId = customerId;
         this.currency = currency;
     }
-
     public AccountId getAccountId() {
         return accountId;
     }
