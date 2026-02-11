@@ -8,6 +8,8 @@ import java.util.Objects;
 
 public record PersonalInfo(String firstName, String lastName, Email email,
                            LocalDate dateOfBirth) implements ValueObject {
+
+
     public PersonalInfo {
         Objects.requireNonNull(firstName, "First name cannot be null");
         Objects.requireNonNull(lastName, "Last name cannot be null");

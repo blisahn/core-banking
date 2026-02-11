@@ -1,12 +1,16 @@
 package com.devblo.account.command.withdrawMoney;
 
 import com.devblo.account.Account;
+import com.devblo.account.AccountId;
 import com.devblo.account.repository.IAccountWriteRepository;
 import com.devblo.common.ICommandHandler;
 import com.devblo.common.Result;
+import com.devblo.shared.Money;
+import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-public class WithdrawMoneyCommandHandler implements ICommandHandler<WithdrawMoneyCommand, Result<Boolean>> {
+@Service
+public class WithdrawMoneyCommandHandler implements ICommandHandler<WithdrawMoneyCommand, Result<Void>> {
     private final IAccountWriteRepository accountWriteRepository;
 
     public WithdrawMoneyCommandHandler(IAccountWriteRepository accountWriteRepository) {
@@ -16,22 +20,25 @@ public class WithdrawMoneyCommandHandler implements ICommandHandler<WithdrawMone
 
     @Override
     @Transactional
-    public Result<Boolean> handle(WithdrawMoneyCommand command) {
+    public Result<Void> handle(WithdrawMoneyCommand command) {
         var optAccount = accountWriteRepository
-                .findById(command.id());
+                .findById(AccountId.of(command.id()));
 
         if (optAccount.isEmpty()) {
-            return  Result.notFound("Account with id " + command.id() + " not found");
+            return Result.failure("Account with id " + command.id() + " not found");
         }
-        try{
+        try {
             Account account = optAccount.get();
-            account.withdraw(command.money());
+            account.withdraw(Money.of(
+                    command.amount(),
+                    command.currency()
+            ));
             accountWriteRepository.save(account);
-        }catch (Exception e){
-            return Result.unexpected(e.getMessage());
+            return Result.success(null);
+        } catch (Exception e) {
+            return Result.failure(e.getMessage());
         }
 
-        return Result.ok(true);
     }
 
 }

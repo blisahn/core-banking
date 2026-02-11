@@ -1,10 +1,10 @@
 package com.devblo.account.command.openAccount;
 
 import com.devblo.account.AccountId;
-import com.devblo.account.AccountType;
 import com.devblo.common.ICommand;
 import com.devblo.common.Result;
-import com.devblo.customer.CustomerId;
+
+import java.util.UUID;
 
 /**
  * Command to open a new bank account.
@@ -14,8 +14,8 @@ import com.devblo.customer.CustomerId;
  * @param currency    Currency code (e.g., "TRY", "USD", "EUR")
  */
 public record OpenAccountCommand(
-        CustomerId customerId,
-        AccountType accountType,
+        UUID customerId,
+        String  accountType,
         String currency
 ) implements ICommand<Result<AccountId>> {
 }
