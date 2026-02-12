@@ -1,7 +1,7 @@
 package com.devblo.customer.command.registerCustomer;
 
 import com.devblo.common.ICommandHandler;
-import com.devblo.common.Result;
+import com.devblo.common.result.Result;
 import com.devblo.customer.Address;
 import com.devblo.customer.Customer;
 import com.devblo.customer.CustomerId;
@@ -22,20 +22,23 @@ public class RegisterCustomerCommandHandler implements ICommandHandler<RegisterC
     @Override
     @Transactional
     public Result<CustomerId> handle(RegisterCustomerCommand command) {
-        var customerExists = customerWriteRepository
-                .findByEmail(command.email());
-        if (customerExists.isPresent()) {
+        Result<Customer> customerExistsResult = customerWriteRepository
+                .findByEmail(command.email())
+                .map(Result::success)
+                .orElseGet(() -> Result.failure("Customer not found"));
+        if (customerExistsResult.isFailure()) {
             return Result.failure("Customer with email " + command.email() + " already exists");
-        } else {
-            var personalInfo = PersonalInfo.of(command.firstName(), command.lastName(), command.email(), command.dateOfBirth());
-            var address = Address.of(command.street(), command.district());
-            try {
-                Customer customer = Customer.register(personalInfo, address);
-                customerWriteRepository.save(customer);
-                return Result.success(customer.getId());
-            } catch (Exception e) {
-                return Result.failure(e.getMessage());
-            }
         }
+        var personalInfo = PersonalInfo.of(
+                command.firstName(),
+                command.lastName(),
+                command.email(),
+                command.dateOfBirth()
+        );
+        Address address = Address.of(command.street(), command.district());
+        var customer = Customer.register(personalInfo, address);
+        customerWriteRepository.save(customer);
+        return Result.success(customer.getId());
     }
 }
+

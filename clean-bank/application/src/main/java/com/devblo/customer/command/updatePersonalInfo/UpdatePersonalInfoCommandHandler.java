@@ -1,7 +1,8 @@
 package com.devblo.customer.command.updatePersonalInfo;
 
 import com.devblo.common.ICommandHandler;
-import com.devblo.common.Result;
+import com.devblo.common.result.Result;
+import com.devblo.customer.Customer;
 import com.devblo.customer.CustomerId;
 import com.devblo.customer.PersonalInfo;
 import com.devblo.customer.repository.ICustomerWriteRepository;
@@ -19,20 +20,24 @@ public class UpdatePersonalInfoCommandHandler implements ICommandHandler<UpdateP
     @Override
     @Transactional
     public Result<PersonalInfo> handle(UpdatePersonalInfoCommand command) {
-        var customerExists = customerWriteRepository
-                .findById(CustomerId.of(command.customerId()));
-        if (customerExists.isEmpty()) {
-            return Result.failure("Customer with id " + command.customerId() + " does not exist");
-        } else {
-            try {
-                var newPersonalInfo = PersonalInfo.of(command.firstName(), command.lastName(), command.email(), command.dateOfBirth());
-                var customer = customerExists.get();
-                customer.updatePersonalInfo(newPersonalInfo);
-                customerWriteRepository.save(customer);
-                return Result.success(customer.getPersonalInfo());
-            } catch (IllegalArgumentException e) {
-                return Result.failure(e.getMessage());
-            }
-        }
+
+        Result<Customer> customerResult = customerWriteRepository
+                .findById(CustomerId.of(command.customerId()))
+                .map(Result::success)
+                .orElseGet(() -> Result.failure("Customer not found"));
+        if (customerResult.isFailure())
+            return Result.failure(customerResult.getError());
+        Customer customer = customerResult.getValue();
+        PersonalInfo newPersonalInfo = PersonalInfo.of(
+                command.firstName(),
+                command.lastName(),
+                command.email(),
+                command.dateOfBirth()
+        );
+        Result<Void> updatedResult = customer.updatePersonalInfo(newPersonalInfo);
+        if (updatedResult.isFailure())
+            return Result.failure(updatedResult.getError());
+        customerWriteRepository.save(customer);
+        return Result.success(customer.getPersonalInfo());
     }
 }

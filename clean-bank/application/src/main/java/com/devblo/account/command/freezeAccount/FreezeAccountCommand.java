@@ -1,7 +1,7 @@
 package com.devblo.account.command.freezeAccount;
 
 import com.devblo.common.ICommand;
-import com.devblo.common.Result;
+import com.devblo.common.result.Result;
 
 import java.util.UUID;
 

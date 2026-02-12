@@ -1,7 +1,7 @@
 package com.devblo.account.command.depositMoney;
 
 import com.devblo.common.ICommand;
-import com.devblo.common.Result;
+import com.devblo.common.result.Result;
 
 import java.math.BigDecimal;
 import java.util.UUID;

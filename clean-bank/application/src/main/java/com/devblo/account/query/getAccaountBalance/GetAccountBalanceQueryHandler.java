@@ -3,7 +3,7 @@ package com.devblo.account.query.getAccaountBalance;
 import com.devblo.account.AccountId;
 import com.devblo.account.repository.IAccountReadRepository;
 import com.devblo.common.IQueryHandler;
-import com.devblo.common.Result;
+import com.devblo.common.result.Result;
 import com.devblo.shared.Money;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

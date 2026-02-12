@@ -6,7 +6,7 @@ import com.devblo.account.AccountNumber;
 import com.devblo.account.AccountType;
 import com.devblo.account.repository.IAccountWriteRepository;
 import com.devblo.common.ICommandHandler;
-import com.devblo.common.Result;
+import com.devblo.common.result.Result;
 import com.devblo.customer.CustomerId;
 import com.devblo.customer.repository.ICustomerWriteRepository;
 import org.springframework.stereotype.Service;

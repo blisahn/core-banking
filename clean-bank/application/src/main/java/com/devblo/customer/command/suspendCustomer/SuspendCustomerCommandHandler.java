@@ -1,7 +1,7 @@
 package com.devblo.customer.command.suspendCustomer;
 
 import com.devblo.common.ICommandHandler;
-import com.devblo.common.Result;
+import com.devblo.common.result.Result;
 import com.devblo.customer.Customer;
 import com.devblo.customer.CustomerId;
 import com.devblo.customer.repository.ICustomerWriteRepository;
@@ -20,18 +20,20 @@ public class SuspendCustomerCommandHandler implements ICommandHandler<SuspendCus
     @Override
     @Transactional
     public Result<Void> handle(SuspendCustomerCommand command) {
-        var optCustomer = customerWriteRepository
-                .findById(CustomerId.of(command.customerId()));
-        if (optCustomer.isEmpty()) {
-            return Result.failure("Customer with id " + command.customerId() + " not found");
+        Result<Customer> findCustomerResult = customerWriteRepository
+                .findById(CustomerId.of(command.customerId()))
+                .map(Result::success)
+                .orElseGet(() -> Result.failure("Customer not found"));
+        if (findCustomerResult.isFailure()) {
+            return Result.failure(findCustomerResult.getError());
         }
-        try {
-            Customer customer = optCustomer.get();
-            customer.suspend();
-            customerWriteRepository.save(customer);
-            return Result.success(null);
-        } catch (Exception e) {
-            return Result.failure(e.getMessage());
+        Customer customer = findCustomerResult.getValue();
+        Result<Void> suspendResult = customer.suspend();
+        if (suspendResult.isFailure()) {
+            return Result.failure(suspendResult.getError());
         }
+        customerWriteRepository.save(customer);
+        return Result.success();
+
     }
 }

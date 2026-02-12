@@ -4,7 +4,7 @@ import com.devblo.account.Account;
 import com.devblo.account.AccountId;
 import com.devblo.account.repository.IAccountWriteRepository;
 import com.devblo.common.ICommandHandler;
-import com.devblo.common.Result;
+import com.devblo.common.result.Result;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 

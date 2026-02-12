@@ -1,7 +1,7 @@
 package com.devblo.customer.command.updateAddress;
 
 import com.devblo.common.ICommandHandler;
-import com.devblo.common.Result;
+import com.devblo.common.result.Result;
 import com.devblo.customer.Address;
 import com.devblo.customer.Customer;
 import com.devblo.customer.CustomerId;
@@ -21,21 +21,23 @@ public class UpdateAddressCommandHandler implements ICommandHandler<UpdateAddres
     @Override
     @Transactional
     public Result<Address> handle(UpdateAddressCommand command) {
-        var customerExists = customerRepository
-                .findById(CustomerId.of(command.customerId()));
-        if (customerExists.isEmpty()) {
-            return Result.failure("Customer with ID " + command.customerId() + " does not exist");
-        } else {
-            var address = Address.of(command.street(), command.district());
-            try {
-                Customer customer = customerExists.get();
-                customer.updateAddress(address);
-                customerRepository.save(customer);
-                return Result.success(customer.getAddress());
-            } catch (Exception e) {
-                return Result.failure(e.getMessage());
-            }
+        Result<Customer> customerExistsResult = customerRepository
+                .findById(CustomerId.of(command.customerId()))
+                .map(Result::success)
+                .orElseGet(() -> Result.failure("Customer not found"));
+        if (customerExistsResult.isFailure()) {
+            return Result.failure(customerExistsResult.getError());
         }
-
+        Customer customer = customerExistsResult.getValue();
+        Address address = Address.of(
+                command.street(),
+                command.district()
+        );
+        Result<Void> updateAddressResult = customer.updateAddress(address);
+        if (updateAddressResult.isFailure()) {
+            return Result.failure(updateAddressResult.getError());
+        }
+        customerRepository.save(customer);
+        return Result.success(customer.getAddress());
     }
 }

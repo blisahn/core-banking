@@ -1,7 +1,7 @@
 package com.devblo.customer.command.activateCustomer;
 
 import com.devblo.common.ICommandHandler;
-import com.devblo.common.Result;
+import com.devblo.common.result.Result;
 import com.devblo.customer.Customer;
 import com.devblo.customer.CustomerId;
 import com.devblo.customer.repository.ICustomerWriteRepository;
@@ -20,18 +20,19 @@ public class ActivateCustomerCommandHandler implements ICommandHandler<ActivateC
     @Override
     @Transactional
     public Result<Void> handle(ActivateCustomerCommand command) {
-        var optCustomer = customerWriteRepository
-                .findById(CustomerId.of(command.customerId()));
-        if (optCustomer.isEmpty()) {
-            return Result.failure("Customer with id " + command.customerId() + " not found");
+        Result<Customer> customerToFound = customerWriteRepository
+                .findById(CustomerId.of(command.customerId()))
+                .map(Result::success)
+                .orElseGet(() -> Result.failure("Customer not found"));
+        if (customerToFound.isFailure()) {
+            return Result.failure(customerToFound.getError());
         }
-        try {
-            Customer customer = optCustomer.get();
-            customer.activate();
-            customerWriteRepository.save(customer);
-            return Result.success(null);
-        } catch (Exception e) {
-            return Result.failure(e.getMessage());
+        var customer = customerToFound.getValue();
+        Result<Void> activateResult = customer.activate();
+        if (activateResult.isFailure()) {
+            return Result.failure(activateResult.getError());
         }
+        customerWriteRepository.save(customer);
+        return Result.success();
     }
 }

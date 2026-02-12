@@ -1,7 +1,7 @@
 package com.devblo.customer.command.updatePersonalInfo;
 
 import com.devblo.common.ICommand;
-import com.devblo.common.Result;
+import com.devblo.common.result.Result;
 import com.devblo.customer.PersonalInfo;
 
 import java.time.LocalDate;
