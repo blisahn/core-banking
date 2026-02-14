@@ -28,7 +28,7 @@ public class CloseCustomerCommandHandler implements ICommandHandler<CloseCustome
             return Result.failure(closeCustomerResult.getError());
         }
         Customer customer = closeCustomerResult.getValue();
-        var closeResult = customer.close();
+        Result<Void> closeResult = customer.close();
         if (closeResult.isFailure()) {
             return Result.failure(closeResult.getError());
         }

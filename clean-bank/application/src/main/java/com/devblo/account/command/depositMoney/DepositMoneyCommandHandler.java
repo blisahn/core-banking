@@ -21,22 +21,23 @@ public class DepositMoneyCommandHandler implements ICommandHandler<DepositMoneyC
     @Override
     @Transactional
     public Result<Void> handle(DepositMoneyCommand cmd) {
-        var optAccount = accountWriteRepository
-                .findById(AccountId.of(cmd.id()));
-        if (optAccount.isEmpty()) {
-            return Result.failure("Account with id " + cmd.id() + " not found");
+        Result<Account> optAccount = accountWriteRepository
+                .findById(AccountId.of(cmd.id()))
+                .map(Result::success)
+                .orElseGet(() -> Result.failure("Account not found"));
+        if (optAccount.isFailure()) {
+            return Result.failure(optAccount.getError());
         }
-        try {
-            Account account = optAccount.get();
-            account.deposit(Money.of(
-                    cmd.amount(),
-                    cmd.currency()
-            ));
-            accountWriteRepository.save(account);
-            return Result.success(null);
-        } catch (RuntimeException e) {
-            return Result.failure(e.getMessage());
+        Account account = optAccount.getValue();
+        Result<Void> depositResult = account.deposit(Money.of(
+                cmd.amount(),
+                cmd.currency()
+        ));
+        if (depositResult.isFailure()) {
+            return Result.failure(depositResult.getError());
         }
+        accountWriteRepository.save(account);
+        return Result.success();
     }
 }
 

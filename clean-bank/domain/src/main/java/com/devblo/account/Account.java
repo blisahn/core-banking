@@ -4,6 +4,7 @@ import com.devblo.account.event.AccountOpenedEvent;
 import com.devblo.account.event.MoneyDepositedEvent;
 import com.devblo.account.event.MoneyWithdrawEvent;
 import com.devblo.common.BaseAggregateRoot;
+import com.devblo.common.result.Result;
 import com.devblo.customer.CustomerId;
 import com.devblo.exception.*;
 import com.devblo.shared.Money;
@@ -77,7 +78,6 @@ public class Account extends BaseAggregateRoot<AccountId> {
         Objects.requireNonNull(customerId, "CustomerId must not be null");
         Objects.requireNonNull(type, "AccountType must not be null");
         Objects.requireNonNull(currency, "Currency must not be null");
-
         AccountId id = AccountId.generate();
         Money initialBalance = Money.zero(currency);
         Account account = new Account(
@@ -88,79 +88,101 @@ public class Account extends BaseAggregateRoot<AccountId> {
                 type,
                 AccountStatus.ACTIVE
         );
-
         account.registerEvent(new AccountOpenedEvent(id, type, customerId, currency));
-
         return account;
     }
 
     // BUSINESS METHODS
-    public void deposit(Money amount) {
-        validateActive();
-        validatePositiveAmount(amount);
+    public Result<Void> deposit(Money amount) {
+        Result<Void> activeValidationResult = validateActive();
+        if (activeValidationResult.isFailure()) {
+            return activeValidationResult;
+        }
+        Result<Void> amountValidation = validatePositiveAmount(amount);
+        if (amountValidation.isFailure()) {
+            return amountValidation;
+        }
         this.balance = this.balance.add(amount);
         markUpdated();
         registerEvent(new MoneyDepositedEvent(getId(), amount, this.balance));
+        return Result.success();
     }
 
-    public void withdraw(Money amount) {
-        validateActive();
-        validatePositiveAmount(amount);
-        validateSufficientBalance(amount);
+    public Result<Void> withdraw(Money amount) {
+        Result<Void> activeValidationResult = validateActive();
+        if (activeValidationResult.isFailure()) {
+            return activeValidationResult;
+        }
+        Result<Void> amountValidation = validatePositiveAmount(amount);
+        if (amountValidation.isFailure()) {
+            return amountValidation;
+        }
+        Result<Void> sufficientBalanceValidation = validateSufficientBalance(amount);
+        if (sufficientBalanceValidation.isFailure()) {
+            return sufficientBalanceValidation;
+        }
         this.balance = this.balance.subtract(amount);
         markUpdated();
         registerEvent(new MoneyWithdrawEvent(getId(), amount, this.balance));
+        return Result.success();
     }
 
-    public void freeze() {
+    public Result<Void> freeze() {
         if (this.status == AccountStatus.CLOSED) {
-            throw new BusinessRuleViolationException("Cannot freeze a closed account");
+            return Result.failure("Can not freeze an account that is closed.");
         }
         if (this.status == AccountStatus.FROZEN) {
-            return;
+            return Result.success();
         }
         this.status = AccountStatus.FROZEN;
         markUpdated();
+        return Result.success();
     }
 
-    public void activate() {
+    public Result<Void> activate() {
         if (this.status == AccountStatus.CLOSED) {
-            throw new BusinessRuleViolationException("Cannot activate an account that has been closed");
+            return Result.failure("Can not activate an account that is closed.");
         }
         if (this.status == AccountStatus.ACTIVE) {
-            return;
+            return Result.success();
         }
         this.status = AccountStatus.ACTIVE;
         markUpdated();
+        return Result.success();
     }
 
 
-    public void close() {
+    public Result<Void> close() {
         if (!this.balance.isZero()) {
-            throw new AccountBalanceNotZeroException(this.balance);
+            return Result.failure("Can not close an account with the money");
         }
         if (this.status == AccountStatus.CLOSED) {
-            return;
+            return Result.success();
         }
         this.status = AccountStatus.CLOSED;
         markUpdated();
+        return Result.success();
     }
 
     // VALIDATORS
-    private void validatePositiveAmount(Money amount) {
+    private Result<Void> validatePositiveAmount(Money amount) {
         if (amount.isZero())
-            throw new InvalidMoneyException();
+            return Result.failure("Amount must not be zero");
+        return Result.success();
     }
 
-    private void validateActive() {
+
+    private Result<Void> validateActive() {
         if (this.status != AccountStatus.ACTIVE)
-            throw new AccountNotActiveException(this.status);
+            return Result.failure("Account is not active");
+        return Result.success();
     }
 
-    private void validateSufficientBalance(Money amount) {
+    private Result<Void> validateSufficientBalance(Money amount) {
         if (this.balance.isLessThan(amount)) {
-            throw new InsufficientFundsException(amount, this.balance);
+            return Result.failure("Amount must be greater than balance");
         }
+        return Result.success();
     }
 
 

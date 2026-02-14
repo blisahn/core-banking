@@ -3,36 +3,30 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
-		<groupId>org.springframework.boot</groupId>
-		<artifactId>spring-boot-starter-parent</artifactId>
-		<version>4.0.2</version>
-		<relativePath/> <!-- lookup parent from repository -->
+		<groupId>com.devblo</groupId>
+		<artifactId>clean-bank</artifactId>
+		<version>0.0.1-SNAPSHOT</version>
 	</parent>
-	<groupId>com.devblo</groupId>
+
 	<artifactId>infrastructure</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
 	<name>infrastructure</name>
-	<description>Demo project for Spring Boot</description>
-	<url/>
-	<licenses>
-		<license/>
-	</licenses>
-	<developers>
-		<developer/>
-	</developers>
-	<scm>
-		<connection/>
-		<developerConnection/>
-		<tag/>
-		<url/>
-	</scm>
-	<properties>
-		<java.version>21</java.version>
-	</properties>
+	<description>Infrastructure layer - persistence, external services</description>
+
 	<dependencies>
+		<!-- Internal modules -->
+		<dependency>
+			<groupId>com.devblo</groupId>
+			<artifactId>domain</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>com.devblo</groupId>
+			<artifactId>application</artifactId>
+		</dependency>
+
+		<!-- Spring Boot -->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter</artifactId>
+			<artifactId>spring-boot-starter-data-jpa</artifactId>
 		</dependency>
 
 		<dependency>

@@ -21,24 +21,24 @@ public class WithdrawMoneyCommandHandler implements ICommandHandler<WithdrawMone
     @Override
     @Transactional
     public Result<Void> handle(WithdrawMoneyCommand command) {
-        var optAccount = accountWriteRepository
-                .findById(AccountId.of(command.id()));
-
-        if (optAccount.isEmpty()) {
+        Result<Account> optAccount = accountWriteRepository
+                .findById(AccountId.of(command.id()))
+                .map(Result::success)
+                .orElseGet(() -> Result.failure("Account not found"));
+        if (optAccount.isFailure()) {
             return Result.failure("Account with id " + command.id() + " not found");
         }
-        try {
-            Account account = optAccount.get();
-            account.withdraw(Money.of(
-                    command.amount(),
-                    command.currency()
-            ));
-            accountWriteRepository.save(account);
-            return Result.success(null);
-        } catch (Exception e) {
-            return Result.failure(e.getMessage());
-        }
 
+        Account account = optAccount.getValue();
+        Result<Void> witrhdrawResult = account.withdraw(Money.of(
+                command.amount(),
+                command.currency()
+        ));
+        if (witrhdrawResult.isFailure()) {
+            return witrhdrawResult;
+        }
+        accountWriteRepository.save(account);
+        return Result.success(null);
     }
 
 }

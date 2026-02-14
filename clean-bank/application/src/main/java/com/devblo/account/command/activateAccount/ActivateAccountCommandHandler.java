@@ -20,17 +20,19 @@ public class ActivateAccountCommandHandler implements ICommandHandler<ActivateAc
     @Override
     @Transactional
     public Result<Void> handle(ActivateAccountCommand command) {
-        var optAccount = accountWriteRepository
-                .findById(AccountId.of(command.accountId()));
-        if (optAccount.isEmpty())
-            return Result.failure("account with id " + command.accountId() + " not found");
-        try {
-            Account account = optAccount.get();
-            account.activate();
-            accountWriteRepository.save(account);
-            return Result.success(null);
-        } catch (Exception e) {
-            return Result.failure(e.getMessage());
+        Result<Account> optAccount = accountWriteRepository
+                .findById(AccountId.of(command.accountId()))
+                .map(Result::success)
+                .orElseGet(() -> Result.failure("Account not found"));
+        if (optAccount.isFailure())
+            return Result.failure(optAccount.getError());
+        Account account = optAccount.getValue();
+        Result<Void> activationResult = account.activate();
+        if (activationResult.isFailure()) {
+            return Result.failure(activationResult.getError());
         }
+        accountWriteRepository.save(account);
+        return Result.success();
+
     }
 }

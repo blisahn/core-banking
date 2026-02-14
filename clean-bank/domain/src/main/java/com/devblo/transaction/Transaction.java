@@ -2,7 +2,7 @@ package com.devblo.transaction;
 
 import com.devblo.account.AccountId;
 import com.devblo.common.BaseAggregateRoot;
-import com.devblo.exception.InvalidMoneyException;
+import com.devblo.common.result.Result;
 import com.devblo.shared.Money;
 import com.devblo.transaction.event.TransactionCreatedEvent;
 
@@ -10,7 +10,7 @@ import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.Objects;
 
-//Immutable Aggreagte
+//Immutable Aggregate
 // Fixed: Added final tags
 public class Transaction extends BaseAggregateRoot<TransactionId> {
     private final AccountId sourceAccountId;
@@ -55,12 +55,12 @@ public class Transaction extends BaseAggregateRoot<TransactionId> {
     }
 
 
-    public static Transaction deposit(AccountId targetAccountId, Money amount, String description) {
+    public static Result<Transaction> deposit(AccountId targetAccountId, Money amount, String description) {
         Objects.requireNonNull(targetAccountId, "TargetAccountId cannot be null");
         Objects.requireNonNull(amount, "Amount cannot be null");
         Objects.requireNonNull(description, "Description cannot be null");
-        if (amount.isZero() || amount.amount().compareTo(BigDecimal.ZERO) < 0) {
-            throw new InvalidMoneyException();
+        if (isAmountInvalid(amount)) {
+            return Result.failure("Deposit amount must be greater than or equal to zero");
         }
         TransactionId id = TransactionId.generate();
         Transaction transaction = new Transaction(
@@ -75,12 +75,15 @@ public class Transaction extends BaseAggregateRoot<TransactionId> {
         );
 
         transaction.registerEvent(new TransactionCreatedEvent(id, TransactionType.DEPOSIT, TransactionStatus.DONE));
-        return transaction;
+        return Result.success(transaction);
     }
 
-    public static Transaction withdraw(AccountId sourceAccountId, Money amount, String description) {
+    public static Result<Transaction> withdraw(AccountId sourceAccountId, Money amount, String description) {
         Objects.requireNonNull(sourceAccountId, "SourceAccountId cannot be null");
         Objects.requireNonNull(amount, "Amount cannot be null");
+        if (isAmountInvalid(amount)) {
+            return Result.failure("Withdraw amount must be greater than or equal to zero");
+        }
         TransactionId id = TransactionId.generate();
         Transaction transaction = new Transaction(
                 id,
@@ -93,13 +96,20 @@ public class Transaction extends BaseAggregateRoot<TransactionId> {
                 Instant.now()
         );
         transaction.registerEvent(new TransactionCreatedEvent(id, TransactionType.WITHDRAWAL, TransactionStatus.DONE));
-        return transaction;
+        return Result.success(transaction);
     }
 
-    public static Transaction transfer(AccountId sourceAccountId, AccountId targetAccountId, Money amount, String description) {
+    public static Result<Transaction> transfer(AccountId sourceAccountId, AccountId targetAccountId, Money amount, String description) {
         Objects.requireNonNull(sourceAccountId, "SourceAccountId cannot be null");
         Objects.requireNonNull(targetAccountId, "TargetAccountId cannot be null");
         Objects.requireNonNull(amount, "Amount cannot be null");
+        if (isAmountInvalid(amount)) {
+            return Result.failure("Transfer amount must be greater than zero");
+        }
+
+        if (sourceAccountId.equals(targetAccountId)) {
+            return Result.failure("Cannot transfer money to the same account");
+        }
         TransactionId id = TransactionId.generate();
         Transaction transaction = new Transaction(
                 id,
@@ -112,7 +122,11 @@ public class Transaction extends BaseAggregateRoot<TransactionId> {
                 Instant.now()
         );
         transaction.registerEvent(new TransactionCreatedEvent(id, TransactionType.TRANSFER, TransactionStatus.DONE));
-        return transaction;
+        return Result.success(transaction);
+    }
+
+    private static boolean isAmountInvalid(Money amount) {
+        return amount.isZero() || amount.amount().compareTo(BigDecimal.ZERO) < 0;
     }
 
 

@@ -20,19 +20,22 @@ public class FreezeAccountCommandHandler implements ICommandHandler<FreezeAccoun
     @Override
     @Transactional
     public Result<Void> handle(FreezeAccountCommand command) {
-        var optAccount = accountWriteRepository
-                .findById(AccountId.of(command.accountId()));
-        if (optAccount.isEmpty()) {
-            return Result.failure("Account with id " + command.accountId() + " not found");
+        Result<Account> optAccount = accountWriteRepository
+                .findById(AccountId.of(command.accountId()))
+                .map(Result::success)
+                .orElseGet(() -> Result.failure("Account not found"));
+        if (optAccount.isFailure()) {
+            return Result.failure(optAccount.getError());
         }
-        try {
-            Account account = optAccount.get();
-            account.freeze();
-            accountWriteRepository.save(account);
-        return Result.success(null);
 
-        } catch (Exception e) {
-            return Result.failure(e.getMessage());
+        Account account = optAccount.getValue();
+        Result<Void> freezeResult = account.freeze();
+        if (freezeResult.isFailure()) {
+            return Result.failure(freezeResult.getError());
         }
+        accountWriteRepository.save(account);
+        return Result.success();
+
+
     }
 }
