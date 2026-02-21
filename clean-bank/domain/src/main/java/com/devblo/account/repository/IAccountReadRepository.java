@@ -7,6 +7,7 @@ import com.devblo.shared.Money;
 import java.util.List;
 import java.util.Optional;
 
+
 public interface IAccountReadRepository {
 
     Optional<AccountSummary> findSummaryById(AccountId id);

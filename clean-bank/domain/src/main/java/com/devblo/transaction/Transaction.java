@@ -22,8 +22,8 @@ public class Transaction extends BaseAggregateRoot<TransactionId> {
     private final Instant timestamp;
 
     private Transaction(TransactionId transactionId, AccountId sourceAccountId, AccountId targetAccountId,
-                        Money amount, TransactionType type, TransactionStatus status,
-                        String description, Instant timestamp) {
+            Money amount, TransactionType type, TransactionStatus status,
+            String description, Instant timestamp) {
         super(transactionId);
         this.sourceAccountId = sourceAccountId;
         this.targetAccountId = targetAccountId;
@@ -35,8 +35,8 @@ public class Transaction extends BaseAggregateRoot<TransactionId> {
     }
 
     private Transaction(TransactionId id, AccountId sourceAccountId, AccountId targetAccountId,
-                        Money amount, TransactionType type, TransactionStatus status,
-                        String description, Instant timestamp, Instant createdAt, Instant updatedAt) {
+            Money amount, TransactionType type, TransactionStatus status,
+            String description, Instant timestamp, Instant createdAt, Instant updatedAt) {
         super(id, createdAt, updatedAt);
         this.sourceAccountId = sourceAccountId;
         this.targetAccountId = targetAccountId;
@@ -49,11 +49,11 @@ public class Transaction extends BaseAggregateRoot<TransactionId> {
 
     // Reconstruction
     public static Transaction reconstitute(TransactionId id, AccountId sourceAccountId, AccountId targetAccountId,
-                                           Money amount, TransactionType type, TransactionStatus status,
-                                           String description, Instant timestamp, Instant createdAt, Instant updatedAt) {
-        return new Transaction(id, sourceAccountId, targetAccountId, amount, type, status, description, timestamp, createdAt, updatedAt);
+            Money amount, TransactionType type, TransactionStatus status,
+            String description, Instant timestamp, Instant createdAt, Instant updatedAt) {
+        return new Transaction(id, sourceAccountId, targetAccountId, amount, type, status, description, timestamp,
+                createdAt, updatedAt);
     }
-
 
     public static Result<Transaction> deposit(AccountId targetAccountId, Money amount, String description) {
         Objects.requireNonNull(targetAccountId, "TargetAccountId cannot be null");
@@ -71,8 +71,7 @@ public class Transaction extends BaseAggregateRoot<TransactionId> {
                 TransactionType.DEPOSIT,
                 TransactionStatus.DONE,
                 description,
-                Instant.now()
-        );
+                Instant.now());
 
         transaction.registerEvent(new TransactionCreatedEvent(id, TransactionType.DEPOSIT, TransactionStatus.DONE));
         return Result.success(transaction);
@@ -93,13 +92,13 @@ public class Transaction extends BaseAggregateRoot<TransactionId> {
                 TransactionType.WITHDRAWAL,
                 TransactionStatus.DONE,
                 description,
-                Instant.now()
-        );
+                Instant.now());
         transaction.registerEvent(new TransactionCreatedEvent(id, TransactionType.WITHDRAWAL, TransactionStatus.DONE));
         return Result.success(transaction);
     }
 
-    public static Result<Transaction> transfer(AccountId sourceAccountId, AccountId targetAccountId, Money amount, String description) {
+    public static Result<Transaction> transfer(AccountId sourceAccountId, AccountId targetAccountId, Money amount,
+            String description) {
         Objects.requireNonNull(sourceAccountId, "SourceAccountId cannot be null");
         Objects.requireNonNull(targetAccountId, "TargetAccountId cannot be null");
         Objects.requireNonNull(amount, "Amount cannot be null");
@@ -119,8 +118,7 @@ public class Transaction extends BaseAggregateRoot<TransactionId> {
                 TransactionType.TRANSFER,
                 TransactionStatus.DONE,
                 description,
-                Instant.now()
-        );
+                Instant.now());
         transaction.registerEvent(new TransactionCreatedEvent(id, TransactionType.TRANSFER, TransactionStatus.DONE));
         return Result.success(transaction);
     }
@@ -128,7 +126,6 @@ public class Transaction extends BaseAggregateRoot<TransactionId> {
     private static boolean isAmountInvalid(Money amount) {
         return amount.isZero() || amount.amount().compareTo(BigDecimal.ZERO) < 0;
     }
-
 
     // Getters
     public AccountId getSourceAccountId() {

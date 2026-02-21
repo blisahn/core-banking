@@ -2,9 +2,9 @@ package com.devblo.api.controller;
 
 import com.devblo.api.controller.common.ApiResponse;
 import com.devblo.api.controller.common.BaseController;
-import com.devblo.api.model.request.DepositTransactionRequest;
-import com.devblo.api.model.request.TransferTransactionRequest;
-import com.devblo.api.model.request.WithdrawTransactionRequest;
+import com.devblo.api.model.request.transaction.DepositTransactionRequest;
+import com.devblo.api.model.request.transaction.TransferTransactionRequest;
+import com.devblo.api.model.request.transaction.WithdrawTransactionRequest;
 import com.devblo.common.Mediator;
 import com.devblo.transaction.TransactionId;
 import com.devblo.transaction.command.depositTransactionCommand.DepositTransactionCommand;

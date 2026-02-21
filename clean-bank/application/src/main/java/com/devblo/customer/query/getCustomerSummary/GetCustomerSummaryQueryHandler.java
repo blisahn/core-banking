@@ -22,6 +22,6 @@ public class GetCustomerSummaryQueryHandler implements IQueryHandler<GetCustomer
     public Result<CustomerSummary> handle(GetCustomerSummaryQuery query) {
         return customerReadRepository.findSummaryById(CustomerId.of(query.id()))
                 .map(Result::success)
-                .orElseGet(() -> Result.failure("Account not found"));
+                .orElseGet(() -> Result.failure("Customer not found"));
     }
 }

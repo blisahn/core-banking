@@ -3,7 +3,5 @@ package com.devblo.customer.command.closeCustomer;
 import com.devblo.common.ICommand;
 import com.devblo.common.result.Result;
 
-import java.util.UUID;
-
-public record CloseCustomerCommand(UUID customerId) implements ICommand<Result<Void>> {
+public record CloseCustomerCommand(String customerId) implements ICommand<Result<Void>> {
 }

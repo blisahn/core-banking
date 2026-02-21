@@ -22,13 +22,11 @@ public class RegisterCustomerCommandHandler implements ICommandHandler<RegisterC
     @Override
     @Transactional
     public Result<CustomerId> handle(RegisterCustomerCommand command) {
-        Result<Customer> customerExistsResult = customerWriteRepository
-                .findByEmail(command.email())
-                .map(Result::success)
-                .orElseGet(() -> Result.failure("Customer not found"));
-        if (customerExistsResult.isFailure()) {
+        boolean isEmailExists = customerWriteRepository.findByEmail(command.email()).isPresent();
+        if (isEmailExists) {
             return Result.failure("Customer with email " + command.email() + " already exists");
         }
+
         var personalInfo = PersonalInfo.of(
                 command.firstName(),
                 command.lastName(),

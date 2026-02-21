@@ -1,4 +1,4 @@
-package com.devblo.api.model.request;
+package com.devblo.api.model.request.transaction;
 
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.NotBlank;
