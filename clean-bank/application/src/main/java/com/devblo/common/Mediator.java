@@ -1,9 +1,8 @@
 package com.devblo.common;
 
+import org.springframework.core.GenericTypeResolver;
 import org.springframework.stereotype.Component;
 
-import java.lang.reflect.ParameterizedType;
-import java.lang.reflect.Type;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -16,32 +15,19 @@ public class Mediator {
 
     public Mediator(List<ICommandHandler<?, ?>> allCommandHandlers,
                     List<IQueryHandler<?, ?>> allQueryHandlers) {
-        for (var handler : allCommandHandlers) {
-            Class<?> commandType = extractGenericType(handler, ICommandHandler.class);
+
+        allCommandHandlers.forEach(handler -> {
+            Class<?> commandType = GenericTypeResolver.resolveTypeArguments(handler.getClass(), ICommandHandler.class)[0];
             commandHandlers.put(commandType, handler);
-        }
-
-        for (var handler : allQueryHandlers) {
-            Class<?> queryType = extractGenericType(handler, IQueryHandler.class);
+        });
+        allQueryHandlers.forEach(handler -> {
+            Class<?> queryType = GenericTypeResolver.resolveTypeArguments(handler.getClass(), IQueryHandler.class)[0];
             queryHandlers.put(queryType, handler);
-        }
+        });
     }
 
-    private Class<?> extractGenericType(Object handler, Class<?> targetInterface) {
-        for (Type genericInterface : handler.getClass().getGenericInterfaces()) {
-            if (genericInterface instanceof ParameterizedType paramType) {
-                if (paramType.getRawType().equals(targetInterface)) {
-                    Type firstTypeArg = paramType.getActualTypeArguments()[0];
-                    if (firstTypeArg instanceof Class<?> clazz) {
-                        return clazz;
-                    }
-                }
-            }
-        }
-        throw new IllegalStateException(
-                "Could not extract generic type from handler: " + handler.getClass().getName()
-        );
-    }
+
+
 
     @SuppressWarnings("unchecked")
     public <R> R sendCommand(ICommand<R> command) {

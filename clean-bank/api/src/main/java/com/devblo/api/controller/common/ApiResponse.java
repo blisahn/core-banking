@@ -5,12 +5,13 @@ public record ApiResponse<T>(
         T data,
         String errorMessage,
         String errorCode) {
+
     @SuppressWarnings("unchecked")
     public static <T> ApiResponse<T> success(T data) {
         return new ApiResponse<>(true, data, null, null);
     }
 
-    public static <T> ApiResponse<T> failure(String message) {
-        return new ApiResponse<>(false, null, message, "BAD_REQUEST");
+    public static <T> ApiResponse<T> failure(String message, String errorCode) {
+        return new ApiResponse<>(false, null, message, errorCode);
     }
 }

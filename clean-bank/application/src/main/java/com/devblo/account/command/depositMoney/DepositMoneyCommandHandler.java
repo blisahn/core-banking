@@ -6,6 +6,8 @@ import com.devblo.account.repository.IAccountWriteRepository;
 import com.devblo.common.ICommandHandler;
 import com.devblo.common.result.Result;
 import com.devblo.shared.Money;
+import com.devblo.transaction.Transaction;
+import com.devblo.transaction.repository.ITransactionWriteRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -13,9 +15,12 @@ import org.springframework.transaction.annotation.Transactional;
 public class DepositMoneyCommandHandler implements ICommandHandler<DepositMoneyCommand, Result<Void>> {
 
     private final IAccountWriteRepository accountWriteRepository;
+    private final ITransactionWriteRepository transactionWriteRepository;
 
-    public DepositMoneyCommandHandler(IAccountWriteRepository accountWriteRepository) {
+    public DepositMoneyCommandHandler(IAccountWriteRepository accountWriteRepository,
+            ITransactionWriteRepository transactionWriteRepository) {
         this.accountWriteRepository = accountWriteRepository;
+        this.transactionWriteRepository = transactionWriteRepository;
     }
 
     @Override
@@ -28,16 +33,24 @@ public class DepositMoneyCommandHandler implements ICommandHandler<DepositMoneyC
         if (optAccount.isFailure()) {
             return Result.failure(optAccount.getError());
         }
+
         Account account = optAccount.getValue();
-        Result<Void> depositResult = account.deposit(Money.of(
-                cmd.amount(),
-                cmd.currency()
-        ));
+        Money amount = Money.of(cmd.amount(), cmd.currency());
+
+        Result<Void> depositResult = account.deposit(amount);
         if (depositResult.isFailure()) {
             return Result.failure(depositResult.getError());
         }
+
+        // Transaction audit log
+        Result<Transaction> txResult = Transaction.deposit(
+                AccountId.of(cmd.id()), amount, cmd.description());
+        if (txResult.isFailure()) {
+            return Result.failure(txResult.getError());
+        }
+
         accountWriteRepository.save(account);
+        transactionWriteRepository.save(txResult.getValue());
         return Result.success();
     }
 }
-

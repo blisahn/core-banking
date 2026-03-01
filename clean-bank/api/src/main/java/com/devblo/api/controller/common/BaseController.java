@@ -11,7 +11,7 @@ public abstract class BaseController {
         } else {
             return ResponseEntity
                     .badRequest()
-                    .body(ApiResponse.failure(result.getError()));
+                    .body(ApiResponse.failure(result.getError(),result.getError()));
         }
     }
 }
