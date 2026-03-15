@@ -4,10 +4,12 @@ import com.devblo.account.Account;
 import com.devblo.account.AccountId;
 import com.devblo.account.AccountNumber;
 import com.devblo.account.repository.IAccountWriteRepository;
+import com.devblo.customer.CustomerId;
 import com.devblo.infrastructure.events.DomainEventPublisher;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Optional;
 
 @Repository
@@ -26,6 +28,14 @@ public class JpaAccountWriteRepository implements IAccountWriteRepository {
     @Override
     public Optional<Account> findByAccountNumber(AccountNumber accountNumber) {
         return jpaRepo.findByAccountNumber(accountNumber.value()).map(mapper::toDomain);
+    }
+
+    @Override
+    public List<Account> findByCustomerId(CustomerId customerId) {
+        return jpaRepo.findByCustomerId(customerId.value())
+                .stream()
+                .map(mapper::toDomain)
+                .toList();
     }
 
     @Override

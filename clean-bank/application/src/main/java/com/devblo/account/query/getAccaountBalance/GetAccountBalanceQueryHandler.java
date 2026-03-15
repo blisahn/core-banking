@@ -24,4 +24,4 @@ public class GetAccountBalanceQueryHandler implements IQueryHandler<GetAccountBa
                 .map(Result::success)
                 .orElseGet(() -> Result.failure("Account not found"));
     }
-}
+}      

@@ -1,5 +1,6 @@
 package com.devblo.customer.command.closeCustomer;
 
+import com.devblo.account.repository.IAccountWriteRepository;
 import com.devblo.common.ICommandHandler;
 import com.devblo.common.result.Result;
 import com.devblo.customer.Customer;
@@ -12,9 +13,11 @@ import org.springframework.transaction.annotation.Transactional;
 public class CloseCustomerCommandHandler implements ICommandHandler<CloseCustomerCommand, Result<Void>> {
 
     private final ICustomerWriteRepository customerWriteRepository;
+    private final IAccountWriteRepository accountWriteRepository;
 
-    public CloseCustomerCommandHandler(ICustomerWriteRepository customerWriteRepository) {
+    public CloseCustomerCommandHandler(ICustomerWriteRepository customerWriteRepository, IAccountWriteRepository accountWriteRepository) {
         this.customerWriteRepository = customerWriteRepository;
+        this.accountWriteRepository = accountWriteRepository;
     }
 
     @Override
