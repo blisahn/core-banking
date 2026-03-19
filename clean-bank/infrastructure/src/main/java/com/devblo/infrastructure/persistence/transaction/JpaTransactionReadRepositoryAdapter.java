@@ -10,7 +10,7 @@ import java.util.List;
 
 @Repository
 @RequiredArgsConstructor
-public class JpaTransactionReadRepository implements ITransactionReadRepository {
+public class JpaTransactionReadRepositoryAdapter implements ITransactionReadRepository {
 
     private final TransactionJpaRepository jpaRepo;
     private final TransactionEntityMapper mapper;

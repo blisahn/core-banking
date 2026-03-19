@@ -11,7 +11,7 @@ import java.util.Optional;
 
 @Repository
 @RequiredArgsConstructor
-public class JpaTransactionWriteRepository implements ITransactionWriteRepository {
+public class JpaTransactionWriteRepositoryAdapter implements ITransactionWriteRepository {
 
     private final TransactionJpaRepository jpaRepo;
     private final TransactionEntityMapper mapper;

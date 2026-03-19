@@ -17,6 +17,7 @@ public class CustomerEntityMapper {
         entity.setFirstName(customer.getPersonalInfo().firstName());
         entity.setLastName(customer.getPersonalInfo().lastName());
         entity.setEmail(customer.getPersonalInfo().email().value());
+        entity.setPassword(customer.getPersonalInfo().password());
         entity.setDateOfBirth(customer.getPersonalInfo().dateOfBirth());
         entity.setStreet(customer.getAddress().street());
         entity.setDistrict(customer.getAddress().district());
@@ -31,7 +32,8 @@ public class CustomerEntityMapper {
                 entity.getFirstName(),
                 entity.getLastName(),
                 Email.of(entity.getEmail()),
-                entity.getDateOfBirth()
+                entity.getDateOfBirth(),
+                entity.getPassword()
         );
         Address address = Address.of(entity.getStreet(), entity.getDistrict());
         return Customer.reconstitute(

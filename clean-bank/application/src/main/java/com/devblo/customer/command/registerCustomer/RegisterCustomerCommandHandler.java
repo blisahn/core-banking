@@ -2,26 +2,28 @@ package com.devblo.customer.command.registerCustomer;
 
 import com.devblo.common.ICommandHandler;
 import com.devblo.common.result.Result;
+import com.devblo.common.security.PasswordEncoderPort;
 import com.devblo.customer.Address;
 import com.devblo.customer.Customer;
-import com.devblo.customer.CustomerId;
 import com.devblo.customer.PersonalInfo;
 import com.devblo.customer.repository.ICustomerWriteRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
-public class RegisterCustomerCommandHandler implements ICommandHandler<RegisterCustomerCommand, Result<CustomerId>> {
+public class RegisterCustomerCommandHandler implements ICommandHandler<RegisterCustomerCommand, Result<Void>> {
 
     private final ICustomerWriteRepository customerWriteRepository;
+    private final PasswordEncoderPort passwordEncoderPort;
 
-    public RegisterCustomerCommandHandler(ICustomerWriteRepository customerWriteRepository) {
+    public RegisterCustomerCommandHandler(ICustomerWriteRepository customerWriteRepository, PasswordEncoderPort passwordEncoderPort) {
         this.customerWriteRepository = customerWriteRepository;
+        this.passwordEncoderPort = passwordEncoderPort;
     }
 
     @Override
     @Transactional
-    public Result<CustomerId> handle(RegisterCustomerCommand command) {
+    public Result<Void> handle(RegisterCustomerCommand command) {
         boolean isEmailExists = customerWriteRepository.findByEmail(command.email()).isPresent();
         if (isEmailExists) {
             return Result.failure("Customer with email " + command.email() + " already exists");
@@ -31,12 +33,12 @@ public class RegisterCustomerCommandHandler implements ICommandHandler<RegisterC
                 command.firstName(),
                 command.lastName(),
                 command.email(),
-                command.dateOfBirth()
+                command.dateOfBirth(),
+                passwordEncoderPort.encode(command.password())
         );
         Address address = Address.of(command.street(), command.district());
         var customer = Customer.register(personalInfo, address);
         customerWriteRepository.save(customer);
-        return Result.success(customer.getId());
+        return Result.success();
     }
 }
-

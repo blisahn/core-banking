@@ -13,7 +13,7 @@ import java.util.Optional;
 
 @Repository
 @RequiredArgsConstructor
-public class JpaCustomerWriteRepository implements ICustomerWriteRepository {
+public class JpaCustomerWriteRepositoryAdapter implements ICustomerWriteRepository {
 
     private final CustomerJpaRepository jpaRepo;
     private final CustomerEntityMapper mapper;

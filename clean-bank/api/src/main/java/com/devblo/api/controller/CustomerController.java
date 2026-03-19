@@ -2,23 +2,19 @@ package com.devblo.api.controller;
 
 import com.devblo.api.controller.common.ApiResponse;
 import com.devblo.api.controller.common.BaseController;
-import com.devblo.api.model.request.customer.RegisterCustomerRequest;
 import com.devblo.api.model.request.customer.UpdateAddressRequest;
 import com.devblo.api.model.request.customer.UpdatePersonalInfoRequest;
 import com.devblo.common.Mediator;
 import com.devblo.common.result.Result;
 import com.devblo.customer.Address;
-import com.devblo.customer.CustomerId;
 import com.devblo.customer.PersonalInfo;
 import com.devblo.customer.command.activateCustomer.ActivateCustomerCommand;
 import com.devblo.customer.command.closeCustomer.CloseCustomerCommand;
-import com.devblo.customer.command.registerCustomer.RegisterCustomerCommand;
 import com.devblo.customer.command.suspendCustomer.SuspendCustomerCommand;
 import com.devblo.customer.command.updateAddress.UpdateAddressCommand;
 import com.devblo.customer.command.updatePersonalInfo.UpdatePersonalInfoCommand;
 import com.devblo.customer.query.getCustomerSummary.GetCustomerSummaryQuery;
 import com.devblo.customer.repository.CustomerSummary;
-
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -31,17 +27,6 @@ public class CustomerController extends BaseController {
 
     private final Mediator mediator;
 
-    @PostMapping
-    public ResponseEntity<ApiResponse<CustomerId>> register(@RequestBody @Valid RegisterCustomerRequest command) {
-        Result<CustomerId> result = mediator.sendCommand(new RegisterCustomerCommand(
-                command.firstName(),
-                command.lastName(),
-                command.email(),
-                command.dateOfBirth(),
-                command.street(),
-                command.district()));
-        return respond(result);
-    }
 
     @PutMapping("/{id}/personal-info")
     public ResponseEntity<ApiResponse<PersonalInfo>> updatePersonalInfo(

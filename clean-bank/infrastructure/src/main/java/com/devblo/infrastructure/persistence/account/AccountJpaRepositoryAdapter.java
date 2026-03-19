@@ -18,7 +18,7 @@ import java.util.UUID;
 //    boolean existsById(AccountId id);
 //
 //    boolean existsByAccountNumber(AccountNumber accountNumber);
-public interface AccountJpaRepository extends JpaRepository<AccountEntity, UUID> {
+public interface AccountJpaRepositoryAdapter extends JpaRepository<AccountEntity, UUID> {
     Optional<AccountEntity> findByAccountNumber(String accountNumber);
     List<AccountEntity> findByCustomerId(UUID customerId);
     List<AccountEntity> findByStatus(AccountStatus status);

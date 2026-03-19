@@ -16,7 +16,7 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class JpaAccountWriteRepository implements IAccountWriteRepository {
 
-    private final AccountJpaRepository jpaRepo;
+    private final AccountJpaRepositoryAdapter jpaRepo;
     private final AccountEntityMapper mapper;
     private final DomainEventPublisher eventPublisher;
 

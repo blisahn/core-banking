@@ -12,7 +12,7 @@ import java.util.Optional;
 
 @Repository
 @RequiredArgsConstructor
-public class JpaCustomerReadRepository implements ICustomerReadRepository {
+public class JpaCustomerReadRepositoryAdapter implements ICustomerReadRepository {
 
     private final CustomerJpaRepository jpaRepo;
     private final CustomerEntityMapper mapper;
@@ -39,5 +39,10 @@ public class JpaCustomerReadRepository implements ICustomerReadRepository {
     @Override
     public long countByCustomerId(CustomerId customerId) {
         return jpaRepo.existsById(customerId.value()) ? 1L : 0L;
+    }
+
+    @Override
+    public Optional<CustomerSummary> findByEmail(String email) {
+        return jpaRepo.findByEmail(email).map(mapper::toSummary);
     }
 }

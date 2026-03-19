@@ -32,7 +32,8 @@ public class UpdatePersonalInfoCommandHandler implements ICommandHandler<UpdateP
                 command.firstName(),
                 command.lastName(),
                 command.email(),
-                command.dateOfBirth()
+                command.dateOfBirth(),
+                customer.getPersonalInfo().password()
         );
         Result<Void> updatedResult = customer.updatePersonalInfo(newPersonalInfo);
         if (updatedResult.isFailure())

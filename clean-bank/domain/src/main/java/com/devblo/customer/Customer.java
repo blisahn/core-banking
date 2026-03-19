@@ -42,7 +42,7 @@ public class Customer extends BaseAggregateRoot<CustomerId> {
                 personalInfo,
                 CustomerStatus.ACTIVE,
                 address
-        );
+                );
 
         customer.registerEvent(new CustomerRegisteredEvent(id, personalInfo, address));
         return customer;

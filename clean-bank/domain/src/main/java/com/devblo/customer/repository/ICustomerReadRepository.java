@@ -11,5 +11,8 @@ public interface ICustomerReadRepository {
     List<CustomerSummary> findAll();
 
     List<CustomerSummary> findActiveCustomers();
+
     long countByCustomerId(CustomerId customerId);
+
+    Optional<CustomerSummary> findByEmail(String email);
 }

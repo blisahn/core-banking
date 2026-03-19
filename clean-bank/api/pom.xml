@@ -23,7 +23,12 @@
 			<artifactId>infrastructure</artifactId>
 		</dependency>
 
-		<!-- Spring Boot --><!-- OpenAPI / Swagger UI -->
+		<!-- Spring Boot -->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-json</artifactId>
+		</dependency>
+		<!-- OpenAPI / Swagger UI -->
         <dependency>
             <groupId>org.springdoc</groupId>
             <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>

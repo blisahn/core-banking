@@ -7,7 +7,7 @@ import java.time.LocalDate;
 import java.util.Objects;
 
 public record PersonalInfo(String firstName, String lastName, Email email,
-                           LocalDate dateOfBirth) implements ValueObject {
+                           LocalDate dateOfBirth, String password) implements ValueObject {
 
 
     public PersonalInfo {
@@ -20,20 +20,20 @@ public record PersonalInfo(String firstName, String lastName, Email email,
 
     }
 
-    public static PersonalInfo of(String firstName, String lastName, Email email, LocalDate dateOfBirth) {
-        return new PersonalInfo(firstName, lastName, email, dateOfBirth);
+    public static PersonalInfo of(String firstName, String lastName, Email email, LocalDate dateOfBirth, String password) {
+        return new PersonalInfo(firstName, lastName, email, dateOfBirth, password);
     }
 
-    public static PersonalInfo of(String firstName, String lastName, Email email, String dateOfBirth) {
-        return new PersonalInfo(firstName, lastName, email, LocalDate.parse(dateOfBirth));
+    public static PersonalInfo of(String firstName, String lastName, Email email, String dateOfBirth, String password) {
+        return new PersonalInfo(firstName, lastName, email, LocalDate.parse(dateOfBirth), password);
     }
 
-    public static PersonalInfo of(String firstName, String lastName, String email, String dateOfBirth) {
-        return new PersonalInfo(firstName, lastName, Email.of(email), LocalDate.parse(dateOfBirth));
+    public static PersonalInfo of(String firstName, String lastName, String email, String dateOfBirth, String password) {
+        return new PersonalInfo(firstName, lastName, Email.of(email), LocalDate.parse(dateOfBirth), password);
     }
 
-    public static PersonalInfo of(String firstName, String lastName, String email, LocalDate dateOfBirth) {
-        return new PersonalInfo(firstName, lastName, Email.of(email), dateOfBirth);
+    public static PersonalInfo of(String firstName, String lastName, String email, LocalDate dateOfBirth, String password) {
+        return new PersonalInfo(firstName, lastName, Email.of(email), dateOfBirth, password);
     }
 
     public String getFullName() {
