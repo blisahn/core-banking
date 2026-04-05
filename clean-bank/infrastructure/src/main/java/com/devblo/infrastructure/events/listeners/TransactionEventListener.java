@@ -1,4 +1,4 @@
-package com.devblo.infrastructure.events.listerners;
+package com.devblo.infrastructure.events.listeners;
 
 import com.devblo.infrastructure.events.outbox.OutboxEventService;
 import com.devblo.transaction.event.TransactionCreatedEvent;

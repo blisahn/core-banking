@@ -42,14 +42,14 @@ public class RabbitMqConfig {
     }
 
     @Bean
-    public Binding transactionBinding(){
+    public Binding customerBinding(){
         return BindingBuilder.bind(customerEventsQueue())
                 .to(bankingExchange())
                 .with(CUSTOMER_ROUTING_KEY);
     }
 
     @Bean
-    public Binding transdactionBinding(){
+    public Binding transactionBinding(){
         return BindingBuilder.bind(transactionEventsQueue())
                 .to(bankingExchange())
                 .with(TRANSACTION_ROUTING_KEY);

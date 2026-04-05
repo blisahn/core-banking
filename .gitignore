@@ -30,3 +30,11 @@ logs/
 .settings/
 .DS_Store
 Thumbs.db
+
+# Plans & internal docs
+PLAN.md
+
+# Claude Code
+.claude/
+CLAUDE.md
+AGENTS.md

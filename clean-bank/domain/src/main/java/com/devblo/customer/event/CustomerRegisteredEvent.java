@@ -33,4 +33,3 @@ public class CustomerRegisteredEvent extends BaseDomainEvent {
         return address;
     }
 }
-

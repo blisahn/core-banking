@@ -14,7 +14,4 @@ public interface ICustomerWriteRepository {
     List<Customer> findCustomersByAddress(Address addresses);
     void delete(Customer customer);
     boolean existsById(CustomerId id);
-
-
-
 }

@@ -25,6 +25,17 @@ public class AccountEntityMapper {
         return entity;
     }
 
+    public AccountEntity updateEntity(AccountEntity entity, Account account) {
+        entity.setAccountNumber(account.getAccountNumber().value());
+        entity.setCustomerId(account.getCustomerId().value());
+        entity.setBalanceAmount(account.getBalance().amount());
+        entity.setBalanceCurrency(account.getBalance().currency().getCurrencyCode());
+        entity.setType(account.getType());
+        entity.setStatus(account.getStatus());
+        entity.setUpdatedAt(account.getUpdatedAt());
+        return entity;
+    }
+
     public Account toDomain(AccountEntity entity) {
         return Account.reconstitute(
                 AccountId.of(entity.getId()),

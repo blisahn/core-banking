@@ -17,29 +17,31 @@ public class OutboxProcessor {
     private final OutboxJpaRepository outboxJpaRepository;
     private final RabbitTemplate rabbitTemplate;
 
+
     @Scheduled(fixedDelay = 5000)
     @Transactional
-    public void process(){
+    public void process() {
+
         List<OutboxEvent> pending = outboxJpaRepository.findByProcessedFalseOrderByCreatedAtAsc();
         for (OutboxEvent event : pending) {
-            try{
+            try {
                 String routingKey = resolveRoutingKey(event.getAggregateType(), event.getEventType());
                 rabbitTemplate.convertAndSend(RabbitMqConfig.BANKING_EXCHANGE, routingKey, event.getPayload());
                 event.markProcessed();
                 outboxJpaRepository.save(event);
                 log.info("Outbox event published: type={}, id={}", event.getEventType(), event.getId());
-            }catch (Exception e){
-                log.error("Failed to publish outbox event id={}: {}",event.getId(), e.getMessage());
+            } catch (Exception e) {
+                log.error("Failed to publish outbox event id={}: {}", event.getId(), e.getMessage());
             }
         }
     }
 
-    private String resolveRoutingKey(String aggregateType, String eventType){
-        return switch (aggregateType.toLowerCase()){
+    private String resolveRoutingKey(String aggregateType, String eventType) {
+        return switch (aggregateType.toLowerCase()) {
             case "account" -> "account." + eventType;
             case "customer" -> "customer." + eventType;
             case "transaction" -> "transaction." + eventType;
-            default -> aggregateType + "."+eventType;
+            default -> aggregateType + "." + eventType;
         };
     }
 }

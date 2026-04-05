@@ -13,16 +13,24 @@ import java.util.UUID;
 @Table(name = "outbox_events")
 @Data
 public class OutboxEvent {
-    @Id private UUID id;
+    @Id
+    private UUID id;
+    @Column(name = "aggregate_type", nullable = false)
     private String aggregateType;
+    @Column(name = "aggregate_id", nullable = false)
     private UUID aggregateId;
+    @Column(name = "event_type", nullable = false)
     private String eventType;
-    @Column(columnDefinition = "TEXT") private String payload;
+    @Column(columnDefinition = "TEXT", nullable = false)
+    private String payload;
+    @Column(name = "created_at", nullable = false)
     private Instant createdAt;
+    @Column(name = "processed", nullable = false)
     private boolean processed;
-    private Instant processedAt; // ← bu da eklenmeli
+    @Column(name = "processed_at")
+    private Instant processedAt;
 
-    public OutboxEvent( ) {
+    public OutboxEvent() {
     }
 
     public OutboxEvent(UUID id, String aggregateType, UUID aggregateId, String eventType, String payload, Instant createdAt, boolean processed, Instant processedAt) {
@@ -36,7 +44,7 @@ public class OutboxEvent {
         this.processedAt = processedAt;
     }
 
-    public void markProcessed(){
+    public void markProcessed() {
         this.processed = true;
         this.processedAt = Instant.now();
     }

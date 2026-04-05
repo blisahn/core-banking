@@ -6,10 +6,13 @@ import java.util.function.Function;
 public sealed interface Result<T> permits Success, Failure {
 
     boolean isSuccess();
+
     default boolean isFailure() {
         return !isSuccess();
     }
+
     T getValue();
+
     String getError();
 
     default <R> Result<R> map(Function<T, R> mapper) {

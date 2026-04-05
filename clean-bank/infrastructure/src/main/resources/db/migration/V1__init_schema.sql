@@ -1,5 +1,18 @@
+-- Outbox Events
+CREATE TABLE outbox_events
+(
+    id             UUID         NOT NULL PRIMARY KEY,
+    aggregate_type VARCHAR(100) NOT NULL,
+    aggregate_id   UUID         NOT NULL,
+    event_type     VARCHAR(255) NOT NULL,
+    payload        TEXT         NOT NULL,
+    created_at     TIMESTAMPTZ  NOT NULL,
+    processed      BOOLEAN      NOT NULL DEFAULT FALSE,
+    processed_at   TIMESTAMPTZ
+);
 -- Customers
-CREATE TABLE customers (
+CREATE TABLE customers
+(
     id            UUID         NOT NULL PRIMARY KEY,
     first_name    VARCHAR(100) NOT NULL,
     last_name     VARCHAR(100) NOT NULL,
@@ -14,10 +27,11 @@ CREATE TABLE customers (
 );
 
 -- Accounts
-CREATE TABLE accounts (
+CREATE TABLE accounts
+(
     id               UUID           NOT NULL PRIMARY KEY,
     account_number   VARCHAR(50)    NOT NULL UNIQUE,
-    customer_id      UUID           NOT NULL REFERENCES customers(id),
+    customer_id      UUID           NOT NULL REFERENCES customers (id),
     balance_amount   NUMERIC(19, 2) NOT NULL,
     balance_currency VARCHAR(3)     NOT NULL,
     type             VARCHAR(50)    NOT NULL,
@@ -27,10 +41,11 @@ CREATE TABLE accounts (
 );
 
 -- Transactions
-CREATE TABLE transactions (
+CREATE TABLE transactions
+(
     id                UUID           NOT NULL PRIMARY KEY,
-    source_account_id UUID           REFERENCES accounts(id),
-    target_account_id UUID           REFERENCES accounts(id),
+    source_account_id UUID REFERENCES accounts (id),
+    target_account_id UUID REFERENCES accounts (id),
     amount            NUMERIC(19, 2) NOT NULL,
     currency          VARCHAR(3)     NOT NULL,
     type              VARCHAR(50)    NOT NULL,
@@ -41,14 +56,3 @@ CREATE TABLE transactions (
     updated_at        TIMESTAMPTZ    NOT NULL
 );
 
--- Outbox Events
-CREATE TABLE outbox_events (
-    id             UUID        NOT NULL PRIMARY KEY,
-    aggregate_type VARCHAR(100) NOT NULL,
-    aggregate_id   UUID        NOT NULL,
-    event_type     VARCHAR(255) NOT NULL,
-    payload        TEXT        NOT NULL,
-    created_at     TIMESTAMPTZ NOT NULL,
-    processed      BOOLEAN     NOT NULL DEFAULT FALSE,
-    processed_at   TIMESTAMPTZ
-);

@@ -1,4 +1,4 @@
-package com.devblo.infrastructure.events.listerners;
+package com.devblo.infrastructure.events.listeners;
 
 import com.devblo.account.Account;
 import com.devblo.account.AccountStatus;

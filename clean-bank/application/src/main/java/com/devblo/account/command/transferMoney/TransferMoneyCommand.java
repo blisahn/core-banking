@@ -8,7 +8,7 @@ import java.util.UUID;
 
 public record TransferMoneyCommand(
         UUID sourceAccountId,
-        UUID targetAccountId,
+        String targetAccountNumber,
         BigDecimal amount,
         String currency,
         String description) implements ICommand<Result<Void>> {

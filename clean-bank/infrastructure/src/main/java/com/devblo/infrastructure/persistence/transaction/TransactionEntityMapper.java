@@ -4,6 +4,7 @@ import com.devblo.account.AccountId;
 import com.devblo.shared.Money;
 import com.devblo.transaction.Transaction;
 import com.devblo.transaction.TransactionId;
+import com.devblo.transaction.repository.TransactionSummary;
 import org.springframework.stereotype.Component;
 
 import java.util.Currency;
@@ -46,6 +47,24 @@ public class TransactionEntityMapper {
                 entity.getTimestamp(),
                 entity.getCreatedAt(),
                 entity.getUpdatedAt()
+        );
+    }
+
+    public TransactionSummary toSummary(TransactionEntity entity) {
+        AccountId sourceAccountId = entity.getSourceAccountId() != null
+                ? AccountId.of(entity.getSourceAccountId()) : null;
+        AccountId targetAccountId = entity.getTargetAccountId() != null
+                ? AccountId.of(entity.getTargetAccountId()) : null;
+        return new TransactionSummary(
+                TransactionId.of(entity.getId()),
+                sourceAccountId,
+                targetAccountId,
+                entity.getAmount(),
+                entity.getCurrency(),
+                entity.getType(),
+                entity.getStatus(),
+                entity.getDescription(),
+                entity.getTimestamp()
         );
     }
 }

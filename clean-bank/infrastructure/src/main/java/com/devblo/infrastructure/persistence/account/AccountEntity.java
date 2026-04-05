@@ -48,4 +48,7 @@ public class AccountEntity {
 
     @Column(nullable = false)
     private Instant updatedAt;
+
+    @Version
+    private Long version;
 }

@@ -1,6 +1,7 @@
 package com.devblo.account.repository;
 
 import com.devblo.account.AccountId;
+import com.devblo.common.PagedResult;
 import com.devblo.customer.CustomerId;
 import com.devblo.shared.Money;
 
@@ -13,6 +14,8 @@ public interface IAccountReadRepository {
     Optional<AccountSummary> findSummaryById(AccountId id);
 
     List<AccountSummary> findSummariesByCustomerId(CustomerId customerId);
+
+    PagedResult<AccountSummary> findSummariesByCustomerId(CustomerId customerId, int page, int size);
 
     List<AccountSummary> findActiveAccounts();
 

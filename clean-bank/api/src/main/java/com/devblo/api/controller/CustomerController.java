@@ -20,6 +20,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.UUID;
+
 @RestController
 @RequestMapping("/api/customers")
 @RequiredArgsConstructor
@@ -27,11 +29,16 @@ public class CustomerController extends BaseController {
 
     private final Mediator mediator;
 
+    private boolean isOwner(String resourceCustomerId) {
+        UUID authenticatedId = getAuthenticatedCustomerId();
+        return authenticatedId.toString().equals(resourceCustomerId);
+    }
 
     @PutMapping("/{id}/personal-info")
     public ResponseEntity<ApiResponse<PersonalInfo>> updatePersonalInfo(
             @PathVariable String id,
             @RequestBody @Valid UpdatePersonalInfoRequest request) {
+        if (!isOwner(id)) return forbidden();
         Result<PersonalInfo> result = mediator.sendCommand(new UpdatePersonalInfoCommand(
                 id,
                 request.firstName(),
@@ -45,6 +52,7 @@ public class CustomerController extends BaseController {
     public ResponseEntity<ApiResponse<Address>> updateAddress(
             @PathVariable String id,
             @RequestBody @Valid UpdateAddressRequest request) {
+        if (!isOwner(id)) return forbidden();
         Result<Address> result = mediator.sendCommand(new UpdateAddressCommand(
                 id,
                 request.street(),
@@ -54,24 +62,28 @@ public class CustomerController extends BaseController {
 
     @PatchMapping("/{id}/suspend")
     public ResponseEntity<ApiResponse<Void>> suspend(@PathVariable String id) {
+        if (!isOwner(id)) return forbidden();
         Result<Void> result = mediator.sendCommand(new SuspendCustomerCommand(id));
         return respond(result);
     }
 
     @PatchMapping("/{id}/activate")
     public ResponseEntity<ApiResponse<Void>> activate(@PathVariable String id) {
+        if (!isOwner(id)) return forbidden();
         Result<Void> result = mediator.sendCommand(new ActivateCustomerCommand(id));
         return respond(result);
     }
 
     @PatchMapping("/{id}/close")
     public ResponseEntity<ApiResponse<Void>> close(@PathVariable String id) {
+        if (!isOwner(id)) return forbidden();
         Result<Void> result = mediator.sendCommand(new CloseCustomerCommand(id));
         return respond(result);
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<ApiResponse<CustomerSummary>> getCustomer(@PathVariable String id) {
+        if (!isOwner(id)) return forbidden();
         Result<CustomerSummary> result = mediator.sendQuery(new GetCustomerSummaryQuery(id));
         return respond(result);
     }

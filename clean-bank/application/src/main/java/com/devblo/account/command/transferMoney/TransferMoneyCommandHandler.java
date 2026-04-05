@@ -2,6 +2,7 @@ package com.devblo.account.command.transferMoney;
 
 import com.devblo.account.Account;
 import com.devblo.account.AccountId;
+import com.devblo.account.AccountNumber;
 import com.devblo.account.repository.IAccountWriteRepository;
 import com.devblo.common.ICommandHandler;
 import com.devblo.common.result.Result;
@@ -27,29 +28,28 @@ public class TransferMoneyCommandHandler implements ICommandHandler<TransferMone
     @Transactional
     public Result<Void> handle(TransferMoneyCommand command) {
         AccountId sourceId = AccountId.of(command.sourceAccountId());
-        AccountId targetId = AccountId.of(command.targetAccountId());
         Money amount = Money.of(command.amount(), command.currency());
 
-        // Find source account
-        Result<Account> sourceResult = accountWriteRepository
-                .findById(sourceId)
-                .map(Result::success)
-                .orElseGet(() -> Result.failure("Source account not found"));
-        if (sourceResult.isFailure()) {
-            return Result.failure(sourceResult.getError());
+        Account sourceAccount = accountWriteRepository.findById(sourceId).orElse(null);
+        if (sourceAccount == null) {
+            return Result.failure("Source account not found");
         }
 
-        // Find target account
-        Result<Account> targetResult = accountWriteRepository
-                .findById(targetId)
-                .map(Result::success)
-                .orElseGet(() -> Result.failure("Target account not found"));
-        if (targetResult.isFailure()) {
-            return Result.failure(targetResult.getError());
+        AccountNumber targetIban;
+        try {
+            targetIban = AccountNumber.of(command.targetAccountNumber());
+        } catch (IllegalArgumentException e) {
+            return Result.failure("Invalid target IBAN format");
         }
 
-        Account sourceAccount = sourceResult.getValue();
-        Account targetAccount = targetResult.getValue();
+        Account targetAccount = accountWriteRepository.findByAccountNumber(targetIban).orElse(null);
+        if (targetAccount == null) {
+            return Result.failure("Target account not found for IBAN: " + command.targetAccountNumber());
+        }
+
+        if (sourceAccount.getId().equals(targetAccount.getId())) {
+            return Result.failure("Cannot transfer to the same account");
+        }
 
         // Withdraw from source
         Result<Void> withdrawResult = sourceAccount.withdraw(amount);
@@ -65,13 +65,19 @@ public class TransferMoneyCommandHandler implements ICommandHandler<TransferMone
 
         // Transaction audit log
         Result<Transaction> txResult = Transaction.transfer(
-                sourceId, targetId, amount, command.description());
+                sourceId, targetAccount.getId(), amount, command.description());
         if (txResult.isFailure()) {
             return Result.failure(txResult.getError());
         }
 
-        accountWriteRepository.save(sourceAccount);
-        accountWriteRepository.save(targetAccount);
+        // Save in consistent order (by UUID) to prevent deadlocks
+        AccountId firstId = sourceId.value().compareTo(targetAccount.getId().value()) < 0
+                ? sourceId
+                : targetAccount.getId();
+        Account first = firstId.equals(sourceId) ? sourceAccount : targetAccount;
+        Account second = firstId.equals(sourceId) ? targetAccount : sourceAccount;
+        accountWriteRepository.save(first);
+        accountWriteRepository.save(second);
         transactionWriteRepository.save(txResult.getValue());
         return Result.success();
     }

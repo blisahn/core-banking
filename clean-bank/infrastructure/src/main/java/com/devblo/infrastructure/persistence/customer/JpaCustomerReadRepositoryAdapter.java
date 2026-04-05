@@ -1,10 +1,14 @@
 package com.devblo.infrastructure.persistence.customer;
 
+import com.devblo.common.PagedResult;
 import com.devblo.customer.CustomerId;
 import com.devblo.customer.CustomerStatus;
 import com.devblo.customer.repository.CustomerSummary;
 import com.devblo.customer.repository.ICustomerReadRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -27,6 +31,17 @@ public class JpaCustomerReadRepositoryAdapter implements ICustomerReadRepository
         return jpaRepo.findAll().stream()
                 .map(mapper::toSummary)
                 .toList();
+    }
+
+    @Override
+    public PagedResult<CustomerSummary> findAll(int page, int size) {
+        Page<CustomerEntity> result = jpaRepo.findAll(
+                PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt")));
+        List<CustomerSummary> content = result.getContent().stream()
+                .map(mapper::toSummary)
+                .toList();
+        return new PagedResult<>(content, result.getNumber(), result.getSize(),
+                result.getTotalElements(), result.getTotalPages());
     }
 
     @Override

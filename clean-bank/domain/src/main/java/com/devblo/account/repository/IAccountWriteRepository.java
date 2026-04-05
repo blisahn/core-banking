@@ -8,6 +8,7 @@ import com.devblo.customer.CustomerId;
 import java.util.List;
 import java.util.Optional;
 
+
 public interface IAccountWriteRepository {
     Optional<Account> findById(AccountId id);
 

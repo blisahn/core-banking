@@ -1,4 +1,4 @@
-package com.devblo.account.query.getAccaountBalance;
+package com.devblo.account.query.getAccountBalance;
 
 import com.devblo.account.repository.AccountSummary;
 import com.devblo.common.IQuery;

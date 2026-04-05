@@ -4,9 +4,13 @@ import com.devblo.account.AccountId;
 import com.devblo.account.AccountStatus;
 import com.devblo.account.repository.AccountSummary;
 import com.devblo.account.repository.IAccountReadRepository;
+import com.devblo.common.PagedResult;
 import com.devblo.customer.CustomerId;
 import com.devblo.shared.Money;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -33,6 +37,17 @@ public class JpaAccountReadRepository implements IAccountReadRepository {
     }
 
     @Override
+    public PagedResult<AccountSummary> findSummariesByCustomerId(CustomerId customerId, int page, int size) {
+        Page<AccountEntity> result = jpaRepo.findByCustomerId(
+                customerId.value(), PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt")));
+        List<AccountSummary> content = result.getContent().stream()
+                .map(mapper::toSummary)
+                .toList();
+        return new PagedResult<>(content, result.getNumber(), result.getSize(),
+                result.getTotalElements(), result.getTotalPages());
+    }
+
+    @Override
     public List<AccountSummary> findActiveAccounts() {
         return jpaRepo.findByStatus(AccountStatus.ACTIVE)
                 .stream()
@@ -42,7 +57,6 @@ public class JpaAccountReadRepository implements IAccountReadRepository {
 
     @Override
     public List<AccountSummary> findAccountsWithBalanceGreaterThan(Money amount) {
-        // All accounts filtered in memory — for production, use a JPQL query
         return jpaRepo.findAll()
                 .stream()
                 .filter(e -> e.getBalanceAmount().compareTo(amount.amount()) > 0)

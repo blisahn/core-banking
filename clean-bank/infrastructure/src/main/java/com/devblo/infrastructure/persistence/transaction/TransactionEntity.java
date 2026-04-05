@@ -56,4 +56,7 @@ public class TransactionEntity {
 
     @Column(nullable = false)
     private Instant updatedAt;
+
+    @Version
+    private Long version;
 }

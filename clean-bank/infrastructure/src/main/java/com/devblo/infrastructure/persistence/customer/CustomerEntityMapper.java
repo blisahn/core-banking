@@ -27,6 +27,19 @@ public class CustomerEntityMapper {
         return entity;
     }
 
+    public CustomerEntity updateEntity(CustomerEntity entity, Customer customer) {
+        entity.setFirstName(customer.getPersonalInfo().firstName());
+        entity.setLastName(customer.getPersonalInfo().lastName());
+        entity.setEmail(customer.getPersonalInfo().email().value());
+        entity.setPassword(customer.getPersonalInfo().password());
+        entity.setDateOfBirth(customer.getPersonalInfo().dateOfBirth());
+        entity.setStreet(customer.getAddress().street());
+        entity.setDistrict(customer.getAddress().district());
+        entity.setStatus(customer.getStatus());
+        entity.setUpdatedAt(customer.getUpdatedAt());
+        return entity;
+    }
+
     public Customer toDomain(CustomerEntity entity) {
         PersonalInfo personalInfo = PersonalInfo.of(
                 entity.getFirstName(),

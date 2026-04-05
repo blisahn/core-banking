@@ -40,7 +40,9 @@ public class JpaAccountWriteRepository implements IAccountWriteRepository {
 
     @Override
     public Account save(Account account) {
-        AccountEntity entity = mapper.toEntity(account);
+        AccountEntity entity = jpaRepo.findById(account.getId().value())
+                .map(existing -> mapper.updateEntity(existing, account))
+                .orElseGet(() -> mapper.toEntity(account));
         AccountEntity saved = jpaRepo.save(entity);
         eventPublisher.publishAll(account);
         return mapper.toDomain(saved);

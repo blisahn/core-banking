@@ -21,7 +21,9 @@ public class JpaCustomerWriteRepositoryAdapter implements ICustomerWriteReposito
 
     @Override
     public Customer save(Customer customer) {
-        CustomerEntity entity = mapper.toEntity(customer);
+        CustomerEntity entity = jpaRepo.findById(customer.getId().value())
+                .map(existing -> mapper.updateEntity(existing, customer))
+                .orElseGet(() -> mapper.toEntity(customer));
         CustomerEntity saved = jpaRepo.save(entity);
         eventPublisher.publishAll(customer);
         return mapper.toDomain(saved);

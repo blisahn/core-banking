@@ -6,10 +6,9 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 
 import java.math.BigDecimal;
-import java.util.UUID;
 
 public record TransferRequest(
-        @NotNull(message = "Target account ID is required") UUID targetAccountId,
+        @NotBlank(message = "Target IBAN is required") String targetAccountNumber,
 
         @NotNull(message = "Amount is required") @DecimalMin(value = "0.01", message = "Amount must be positive") BigDecimal amount,
 
