@@ -13,4 +13,6 @@ public interface ITransactionReadRepository {
                                                      int page, int size);
 
     TransactionStatsSummary getStatsByAccountId(AccountId accountId, Instant from, Instant to);
+
+    PagedResult<TransactionSummary> findAll(int page, int size);
 }

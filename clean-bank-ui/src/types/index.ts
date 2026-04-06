@@ -3,6 +3,15 @@ export interface AuthToken {
   expiresIn: number;
 }
 
+export type UserRole = "ADMIN" | "EMPLOYEE" | "CUSTOMER";
+
+export interface UserSummary {
+  id: ValueId;
+  email: string;
+  role: UserRole;
+  customerId: ValueId | null;
+}
+
 export type AccountType = "CHECKING" | "SAVINGS" | "INVESTMENT";
 export type AccountStatus = "PENDING" | "ACTIVE" | "FROZEN" | "CLOSED";
 export type TransactionType = "DEPOSIT" | "WITHDRAWAL" | "TRANSFER";

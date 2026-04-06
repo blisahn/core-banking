@@ -8,9 +8,6 @@ import com.devblo.common.Mediator;
 import com.devblo.common.result.Result;
 import com.devblo.customer.Address;
 import com.devblo.customer.PersonalInfo;
-import com.devblo.customer.command.activateCustomer.ActivateCustomerCommand;
-import com.devblo.customer.command.closeCustomer.CloseCustomerCommand;
-import com.devblo.customer.command.suspendCustomer.SuspendCustomerCommand;
 import com.devblo.customer.command.updateAddress.UpdateAddressCommand;
 import com.devblo.customer.command.updatePersonalInfo.UpdatePersonalInfoCommand;
 import com.devblo.customer.query.getCustomerSummary.GetCustomerSummaryQuery;
@@ -31,6 +28,7 @@ public class CustomerController extends BaseController {
 
     private boolean isOwner(String resourceCustomerId) {
         UUID authenticatedId = getAuthenticatedCustomerId();
+        if (authenticatedId == null) return false;
         return authenticatedId.toString().equals(resourceCustomerId);
     }
 
@@ -60,32 +58,10 @@ public class CustomerController extends BaseController {
         return respond(result);
     }
 
-    @PatchMapping("/{id}/suspend")
-    public ResponseEntity<ApiResponse<Void>> suspend(@PathVariable String id) {
-        if (!isOwner(id)) return forbidden();
-        Result<Void> result = mediator.sendCommand(new SuspendCustomerCommand(id));
-        return respond(result);
-    }
-
-    @PatchMapping("/{id}/activate")
-    public ResponseEntity<ApiResponse<Void>> activate(@PathVariable String id) {
-        if (!isOwner(id)) return forbidden();
-        Result<Void> result = mediator.sendCommand(new ActivateCustomerCommand(id));
-        return respond(result);
-    }
-
-    @PatchMapping("/{id}/close")
-    public ResponseEntity<ApiResponse<Void>> close(@PathVariable String id) {
-        if (!isOwner(id)) return forbidden();
-        Result<Void> result = mediator.sendCommand(new CloseCustomerCommand(id));
-        return respond(result);
-    }
-
     @GetMapping("/{id}")
     public ResponseEntity<ApiResponse<CustomerSummary>> getCustomer(@PathVariable String id) {
         if (!isOwner(id)) return forbidden();
         Result<CustomerSummary> result = mediator.sendQuery(new GetCustomerSummaryQuery(id));
         return respond(result);
     }
-
 }

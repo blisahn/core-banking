@@ -27,15 +27,21 @@ public class JwtTokenAdapter implements TokenGeneratorPort {
     private long expirationMs;
 
     @Override
-    public String generateToken(String customerId, String email, String role) {
+    public String generateToken(String userId, String email, String role, String customerId) {
         SecretKey key = Keys.hmacShaKeyFor(SECRET_KEY.getBytes(StandardCharsets.UTF_8));
-        return Jwts.builder()
+        var builder = Jwts.builder()
                 .id(UUID.randomUUID().toString()) // jti (JWT ID)
                 .issuer(issuer)                   // iss (Issuer)
                 .audience().add(audience).and()   // aud (Audience) JJWT 0.12 syntax
-                .subject(customerId)              // sub (Kimlik)
+                .subject(userId)                  // sub (User ID)
                 .claim("email", email)            // Custom Claim
-                .claim("role", role)              // Custom Claim
+                .claim("role", role);             // Custom Claim
+
+        if (customerId != null) {
+            builder.claim("customerId", customerId);
+        }
+
+        return builder
                 .issuedAt(new Date())             // iat
                 .expiration(new Date(System.currentTimeMillis() + expirationMs)) // exp
                 .signWith(key)

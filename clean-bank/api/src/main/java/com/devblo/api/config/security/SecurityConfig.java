@@ -31,6 +31,7 @@ public class SecurityConfig {
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 
                 .authorizeHttpRequests(auth -> auth
+                        // Public endpoints
                         .requestMatchers("/api/auth/**").permitAll()
                         .requestMatchers(
                                 "/v3/api-docs/**",
@@ -38,6 +39,17 @@ public class SecurityConfig {
                                 "/swagger-ui/**",
                                 "/swagger-ui.html"
                         ).permitAll()
+
+                        // Admin only
+                        .requestMatchers("/api/admin/**").hasRole("ADMIN")
+
+                        // Employee + Admin (bank teller operations)
+                        .requestMatchers("/api/employees/**").hasAnyRole("ADMIN", "EMPLOYEE")
+
+                        // Customer self-service (ownership enforced at controller level)
+                        .requestMatchers("/api/accounts/**").authenticated()
+                        .requestMatchers("/api/customers/**").authenticated()
+
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);

@@ -7,10 +7,7 @@ import com.devblo.api.model.request.account.MoneyRequest;
 import com.devblo.api.model.request.account.OpenAccountRequest;
 import com.devblo.api.model.request.account.TransferRequest;
 import com.devblo.account.AccountId;
-import com.devblo.account.command.activateAccount.ActivateAccountCommand;
-import com.devblo.account.command.closeAccount.CloseAccountCommand;
 import com.devblo.account.command.depositMoney.DepositMoneyCommand;
-import com.devblo.account.command.freezeAccount.FreezeAccountCommand;
 import com.devblo.account.command.openAccount.OpenAccountCommand;
 import com.devblo.account.command.transferMoney.TransferMoneyCommand;
 import com.devblo.account.command.withdrawMoney.WithdrawMoneyCommand;
@@ -90,27 +87,6 @@ public class AccountController extends BaseController {
                 request.amount(),
                 request.currency(),
                 request.description()));
-        return respond(result);
-    }
-
-    @PatchMapping("/{id}/freeze")
-    public ResponseEntity<ApiResponse<Void>> freeze(@PathVariable UUID id) {
-        if (!isAccountOwner(id)) return forbidden();
-        Result<Void> result = mediator.sendCommand(new FreezeAccountCommand(id));
-        return respond(result);
-    }
-
-    @PatchMapping("/{id}/activate")
-    public ResponseEntity<ApiResponse<Void>> activate(@PathVariable UUID id) {
-        if (!isAccountOwner(id)) return forbidden();
-        Result<Void> result = mediator.sendCommand(new ActivateAccountCommand(id));
-        return respond(result);
-    }
-
-    @PatchMapping("/{id}/close")
-    public ResponseEntity<ApiResponse<Void>> close(@PathVariable UUID id) {
-        if (!isAccountOwner(id)) return forbidden();
-        Result<Void> result = mediator.sendCommand(new CloseAccountCommand(id));
         return respond(result);
     }
 

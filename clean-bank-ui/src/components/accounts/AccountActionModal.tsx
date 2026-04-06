@@ -62,7 +62,7 @@ export default function AccountActionModal({ type, accountId, open, onClose, onS
     setIsSubmitting(true);
     try {
       if (type === 'OPEN') {
-        await api.post('/accounts', { customerId: user?.id, accountType, currency });
+        await api.post('/accounts', { customerId: user?.customerId, accountType, currency });
         toast.success('Account opened successfully');
       } else {
         const payload: Record<string, unknown> = { amount: parseFloat(amount), currency, description };

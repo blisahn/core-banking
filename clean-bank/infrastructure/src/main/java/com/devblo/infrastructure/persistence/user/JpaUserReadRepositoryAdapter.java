@@ -25,4 +25,9 @@ public class JpaUserReadRepositoryAdapter implements IUserReadRepository {
     public List<UserSummary> findAll() {
         return jpaRepo.findAll().stream().map(mapper::toSummary).toList();
     }
+
+    @Override
+    public Optional<UserSummary> findUserByEmail(String email) {
+        return jpaRepo.findByEmail(email).map(mapper::toSummary);
+    }
 }

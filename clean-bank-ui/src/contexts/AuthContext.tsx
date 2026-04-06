@@ -1,11 +1,14 @@
 "use client";
 
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useMemo } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
+import type { UserRole } from '@/types';
 
 export interface User {
   id: string;
   email: string;
+  role: UserRole;
+  customerId: string | null;
 }
 
 interface AuthContextType {
@@ -15,6 +18,10 @@ interface AuthContextType {
   logout: () => void;
   isAuthenticated: boolean;
   isLoading: boolean;
+  isAdmin: boolean;
+  isEmployee: boolean;
+  isCustomer: boolean;
+  hasStaffAccess: boolean;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -32,6 +39,15 @@ function parseJwt(token: string): any {
   }
 }
 
+function buildUser(parsed: any): User {
+  return {
+    id: parsed.sub || parsed.id,
+    email: parsed.email || '',
+    role: parsed.role || 'CUSTOMER',
+    customerId: parsed.customerId || null,
+  };
+}
+
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [token, setToken] = useState<string | null>(null);
   const [user, setUser] = useState<User | null>(null);
@@ -40,24 +56,22 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
 
   useEffect(() => {
-    // Initial token load
     const storedToken = localStorage.getItem('token');
     if (storedToken) {
       setToken(storedToken);
       const parsed = parseJwt(storedToken);
       if (parsed) {
-        setUser({ id: parsed.sub || parsed.id, email: parsed.email || '' });
+        setUser(buildUser(parsed));
       }
     }
     setIsLoading(false);
 
-    // Listen for unauthorized events from API
     const handleUnauthorized = () => {
       setToken(null);
       setUser(null);
       router.push('/login');
     };
-    
+
     window.addEventListener('auth:unauthorized', handleUnauthorized);
     return () => window.removeEventListener('auth:unauthorized', handleUnauthorized);
   }, [router]);
@@ -80,7 +94,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setToken(newToken);
     const parsed = parseJwt(newToken);
     if (parsed) {
-      setUser({ id: parsed.sub || parsed.id, email: parsed.email || '' });
+      setUser(buildUser(parsed));
     }
     router.push('/dashboard');
   };
@@ -92,8 +106,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     router.push('/login');
   };
 
+  const isAdmin = user?.role === 'ADMIN';
+  const isEmployee = user?.role === 'EMPLOYEE';
+  const isCustomer = user?.role === 'CUSTOMER';
+  const hasStaffAccess = isAdmin || isEmployee;
+
   return (
-    <AuthContext.Provider value={{ token, user, login, logout, isAuthenticated: !!token, isLoading }}>
+    <AuthContext.Provider value={{
+      token, user, login, logout,
+      isAuthenticated: !!token, isLoading,
+      isAdmin, isEmployee, isCustomer, hasStaffAccess,
+    }}>
       {children}
     </AuthContext.Provider>
   );

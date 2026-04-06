@@ -71,4 +71,14 @@ public class JpaTransactionReadRepositoryAdapter implements ITransactionReadRepo
         return new TransactionStatsSummary(totalDeposits, totalWithdrawals,
                 totalTransfersIn, totalTransfersOut, transactions.size());
     }
+
+    @Override
+    public PagedResult<TransactionSummary> findAll(int page, int size) {
+        Page<TransactionEntity> result = jpaRepo.findAll(PageRequest.of(page, size));
+        List<TransactionSummary> content = result.getContent().stream()
+                .map(mapper::toSummary)
+                .toList();
+        return new PagedResult<>(content, result.getNumber(), result.getSize(),
+                result.getTotalElements(), result.getTotalPages());
+    }
 }

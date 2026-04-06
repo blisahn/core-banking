@@ -3,19 +3,42 @@
 import { useAuth } from '@/contexts/AuthContext';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { LayoutDashboard, Wallet, ArrowLeftRight, User, LogOut, Code, Menu, X } from 'lucide-react';
-import { useState } from 'react';
+import { LayoutDashboard, Wallet, ArrowLeftRight, User, Users, UserCheck, LogOut, Menu, X } from 'lucide-react';
+import { useState, useMemo } from 'react';
+import { Badge } from '@/components/ui';
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
-  const { logout } = useAuth();
+  const { logout, user } = useAuth();
   const pathname = usePathname();
   const [mobileOpen, setMobileOpen] = useState(false);
 
-  const navigation = [
-    { name: 'Overview', href: '/dashboard', icon: LayoutDashboard },
-    { name: 'Accounts', href: '/dashboard/accounts', icon: Wallet },
-    { name: 'Profile', href: '/dashboard/profile', icon: User },
-  ];
+  const navigation = useMemo(() => {
+    const role = user?.role;
+
+    if (role === 'ADMIN') {
+      return [
+        { name: 'Overview', href: '/dashboard', icon: LayoutDashboard },
+        { name: 'Transactions', href: '/dashboard/transactions', icon: ArrowLeftRight },
+        { name: 'Users', href: '/dashboard/users', icon: Users },
+        { name: 'Customers', href: '/dashboard/customers', icon: UserCheck },
+      ];
+    }
+
+    if (role === 'EMPLOYEE') {
+      return [
+        { name: 'Overview', href: '/dashboard', icon: LayoutDashboard },
+        { name: 'Customers', href: '/dashboard/customers', icon: UserCheck },
+      ];
+    }
+
+    return [
+      { name: 'Overview', href: '/dashboard', icon: LayoutDashboard },
+      { name: 'Accounts', href: '/dashboard/accounts', icon: Wallet },
+      { name: 'Profile', href: '/dashboard/profile', icon: User },
+    ];
+  }, [user?.role]);
+
+  const roleBadge = user?.role === 'ADMIN' || user?.role === 'EMPLOYEE' ? user.role : null;
 
   return (
     <div className="min-h-screen bg-slate-950">
@@ -42,9 +65,16 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
               <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary-500 to-emerald-500 flex items-center justify-center shadow-lg shadow-primary-500/20">
                 <Wallet className="w-6 h-6 text-white" />
               </div>
-              <span className="text-2xl font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-primary-400 to-emerald-400">
-                CleanBank
-              </span>
+              <div>
+                <span className="text-2xl font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-primary-400 to-emerald-400">
+                  CleanBank
+                </span>
+                {roleBadge && (
+                  <div className="mt-1">
+                    <Badge status={roleBadge} />
+                  </div>
+                )}
+              </div>
             </div>
 
             <nav className="flex-1 space-y-1">

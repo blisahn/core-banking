@@ -24,7 +24,7 @@ export default function ProfilePage() {
   const fetchCustomer = async () => {
     if (!user) return;
     try {
-      const data = await api.get<CustomerSummary>(`/customers/${user.id}`);
+      const data = await api.get<CustomerSummary>(`/customers/${user.customerId}`);
       if (data) {
         setCustomer(data);
         setFirstName(data.firstName);
@@ -47,7 +47,7 @@ export default function ProfilePage() {
     if (!user) return;
     setIsUpdating(prev => ({ ...prev, personal: true }));
     try {
-      await api.put(`/customers/${user.id}/personal-info`, { firstName, lastName, email, dateOfBirth });
+      await api.put(`/customers/${user.customerId}/personal-info`, { firstName, lastName, email, dateOfBirth });
       toast.success('Personal info updated');
       fetchCustomer();
     } catch (err: unknown) {
@@ -62,7 +62,7 @@ export default function ProfilePage() {
     if (!user) return;
     setIsUpdating(prev => ({ ...prev, address: true }));
     try {
-      await api.put(`/customers/${user.id}/address`, { street, district });
+      await api.put(`/customers/${user.customerId}/address`, { street, district });
       toast.success('Address updated');
     } catch (err: unknown) {
       toast.error(err instanceof Error ? err.message : 'Failed to update address');
@@ -75,7 +75,7 @@ export default function ProfilePage() {
     if (!user) return;
     setIsUpdating(prev => ({ ...prev, status: true }));
     try {
-      await api.patch(`/customers/${user.id}/${action}`);
+      await api.patch(`/customers/${user.customerId}/${action}`);
       toast.success(`Profile ${action}d successfully`);
       fetchCustomer();
     } catch (err: unknown) {

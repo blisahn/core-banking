@@ -18,7 +18,9 @@ import jakarta.servlet.http.HttpServletResponse;
 import javax.crypto.SecretKey;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Component
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
@@ -33,16 +35,16 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
 
     @Override
-    protected void doFilterInternal(HttpServletRequest request, // <-- Büyük S ile düzeltildi
+    protected void doFilterInternal(HttpServletRequest request,
                                     HttpServletResponse response,
                                     FilterChain filterChain)
-            throws ServletException, IOException { // <-- ServletException eklendi
+            throws ServletException, IOException {
 
         String authHeader = request.getHeader("Authorization");
 
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
             filterChain.doFilter(request, response);
-            return; // Token yoksa devam et (SecurityConfig'de patlayacak zaten)
+            return;
         }
 
         String token = authHeader.substring(7);
@@ -50,7 +52,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         try {
             SecretKey key = Keys.hmacShaKeyFor(SECRET_KEY.getBytes(StandardCharsets.UTF_8));
 
-            // Token'ı çöz ve doğrula
             Claims claims = Jwts.parser()
                     .verifyWith(key)
                     .requireIssuer(issuer)
@@ -59,19 +60,25 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                     .parseSignedClaims(token)
                     .getPayload();
 
-            String customerId = claims.getSubject();
+            String userId = claims.getSubject();
             String role = claims.get("role", String.class);
+            String customerId = claims.get("customerId", String.class); // null for admin/employee
 
-            // Spring Security Context'ine kimliği yerleştir
+            // Store identity details as a map in the principal
+            Map<String, String> principalDetails = new HashMap<>();
+            principalDetails.put("userId", userId);
+            principalDetails.put("role", role);
+            if (customerId != null) {
+                principalDetails.put("customerId", customerId);
+            }
+
             UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
-                    customerId, null, List.of(new SimpleGrantedAuthority("ROLE_" + role)));
+                    principalDetails, null, List.of(new SimpleGrantedAuthority("ROLE_" + role)));
 
             SecurityContextHolder.getContext().setAuthentication(authentication);
 
         } catch (Exception e) {
-            // Token geçersiz veya süresi dolmuş
             SecurityContextHolder.clearContext();
-//             log.warn("Geçersiz token denemesi: {}", e.getMessage());
         }
         filterChain.doFilter(request, response);
     }
