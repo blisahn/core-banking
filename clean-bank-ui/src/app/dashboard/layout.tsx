@@ -3,7 +3,7 @@
 import { useAuth } from '@/contexts/AuthContext';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { LayoutDashboard, Wallet, ArrowLeftRight, User, Users, UserCheck, LogOut, Menu, X } from 'lucide-react';
+import { LayoutDashboard, Wallet, ArrowLeftRight, User, Users, UserCheck, Activity, LogOut, Menu, X } from 'lucide-react';
 import { useState, useMemo } from 'react';
 import { Badge } from '@/components/ui';
 
@@ -21,6 +21,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         { name: 'Transactions', href: '/dashboard/transactions', icon: ArrowLeftRight },
         { name: 'Users', href: '/dashboard/users', icon: Users },
         { name: 'Customers', href: '/dashboard/customers', icon: UserCheck },
+        { name: 'Events', href: '/dashboard/events', icon: Activity },
       ];
     }
 

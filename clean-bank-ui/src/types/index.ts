@@ -93,3 +93,17 @@ export interface ApiResponse<T> {
   errorMessage?: string;
   errorCode?: string;
 }
+
+export type AuditSeverity = "INFO" | "WARNING" | "CRITICAL";
+
+export interface AuditEvent {
+  id: string;
+  eventType: string;
+  aggregateType: string;
+  aggregateId: string;
+  actorId: string | null;
+  actorRole: string | null;
+  summary: string;
+  severity: AuditSeverity;
+  occurredOn: string;
+}
