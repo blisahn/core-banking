@@ -3,6 +3,7 @@ clean-bank/docs/
 
 .env
 .env.*
+!.env.example
 *.secret
 secrets.properties
 credentials.json
