@@ -50,7 +50,6 @@ public class EmployeeController extends BaseController {
 
     @PatchMapping("/customers/{id}/suspend")
     public ResponseEntity<ApiResponse<Void>> suspendCustomer(@PathVariable String id) {
-        //TODO: doesn't publish domain events -> ok doesn't logs anything for audit: fix
         Result<Void> result = mediator.sendCommand(new SuspendCustomerCommand(id));
         return respond(result);
     }
