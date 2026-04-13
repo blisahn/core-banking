@@ -1,6 +1,11 @@
 # CleanBank - Core Banking Platform
 
-A full-stack banking application built with **Clean Architecture** principles, featuring a Spring Boot 4 backend and a Next.js 16 frontend. Simulates real-world ATM/banking operations: account management, deposits, withdrawals, and IBAN-based transfers with **role-based access control** (Admin, Employee, Customer).
+> 🔗 **Live Demo:** [https://ahmedshn.com](https://ahmedshn.com)
+> Demo credentials — Admin: `admin@cleanbank.com` / `admin123`
+
+A full-stack banking application built with **Clean Architecture** principles, featuring a Spring Boot 4 backend and a Next.js 16 frontend. Simulates real-world ATM/banking operations: account management, deposits, withdrawals, IBAN-based transfers, and a real-time audit dashboard — with **role-based access control** (Admin, Employee, Customer).
+
+**Deployed on AWS EC2** with Docker Compose, PostgreSQL, RabbitMQ, and Caddy as a reverse proxy with automatic Let's Encrypt TLS.
 
 ## Architecture
 
@@ -30,6 +35,7 @@ The domain layer has zero framework dependencies. Infrastructure implements doma
 | Spring Data JPA + PostgreSQL | Persistence |
 | Flyway | Database migrations |
 | RabbitMQ | Async event processing |
+| Server-Sent Events (SSE) | Real-time audit event streaming |
 | Springdoc OpenAPI | API documentation (Swagger UI) |
 
 ### Frontend
@@ -39,7 +45,16 @@ The domain layer has zero framework dependencies. Infrastructure implements doma
 | React 19 | UI library |
 | TypeScript 5 | Type safety |
 | Tailwind CSS 4 | Styling |
+| Recharts | Dashboard charts |
 | Axios | HTTP client with interceptors |
+
+### Infrastructure & Deployment
+| Technology | Purpose |
+|---|---|
+| Docker / Docker Compose | Containerization and local/prod orchestration |
+| AWS EC2 (Ubuntu) | Cloud host |
+| Caddy 2 | Reverse proxy with automatic Let's Encrypt TLS |
+| Namecheap DNS | Domain / A records |
 
 ## Key Design Patterns
 
@@ -47,7 +62,8 @@ The domain layer has zero framework dependencies. Infrastructure implements doma
 - **Result Pattern** - Domain operations return `Result<T>` instead of throwing exceptions for business rule violations
 - **Aggregate Roots** - `Account`, `Customer`, `Transaction` aggregates with domain event registration
 - **Repository Split** - Separate `IAccountWriteRepository` / `IAccountReadRepository` interfaces per aggregate
-- **Outbox Pattern** - Domain events persisted transactionally, relayed to RabbitMQ asynchronously
+- **Outbox Pattern** - Domain events persisted transactionally in the same DB transaction as the aggregate save, then relayed to RabbitMQ asynchronously by a scheduled processor (at-least-once delivery, no event loss on crash)
+- **Real-time Audit Dashboard** - Domain events are persisted as audit records and broadcast to connected admins via Server-Sent Events (SSE) for a live activity feed
 - **Optimistic Locking** - `@Version` on all entities with 409 Conflict handling for concurrent modifications
 - **Ports & Adapters** - Domain defines interfaces, infrastructure implements them
 
@@ -84,6 +100,7 @@ Three roles with distinct capabilities:
 - Employee: register walk-in customers
 - Employee: freeze/activate/close accounts by ID
 - Employee: suspend/activate/close customers by ID
+- Admin: real-time audit event stream (SSE) with historical filtering by aggregate type and severity
 
 ### Frontend
 - Dark-themed glass-morphism UI
@@ -96,27 +113,35 @@ Three roles with distinct capabilities:
 
 ## Getting Started
 
-### Prerequisites
-- Java 21+
-- Node.js 18+
-- PostgreSQL (running on `localhost:5432`, database: `cleanbank`, user/password: `postgres/postgres`)
-- RabbitMQ (optional, for async event processing)
+### Option A — Docker Compose (recommended, one command)
 
-### Backend
+Requires Docker and Docker Compose.
+
 ```bash
+cp .env.example .env
+# edit .env: set JWT_SECRET (openssl rand -hex 32), DB/RabbitMQ passwords, DOMAIN, etc.
+docker compose up -d --build
+```
+
+This brings up PostgreSQL, RabbitMQ, the Spring Boot backend, the Next.js frontend, and Caddy (reverse proxy + automatic TLS) behind a single domain.
+
+### Option B — Local development (without Docker)
+
+**Prerequisites:** Java 21+, Node.js 18+, PostgreSQL running on `localhost:5432` (db `cleanbank`, user/password `postgres/postgres`), RabbitMQ (optional).
+
+```bash
+# Backend
 cd clean-bank
 mvn clean install
 mvn spring-boot:run -pl api
-```
-API runs at `http://localhost:8080` | Swagger UI at `http://localhost:8080/swagger-ui`
+# → http://localhost:8080 | Swagger UI: http://localhost:8080/swagger-ui
 
-### Frontend
-```bash
+# Frontend (in another terminal)
 cd clean-bank-ui
 npm install
 npm run dev
+# → http://localhost:3000
 ```
-UI runs at `http://localhost:3000`
 
 ### Default Admin Account
 On first startup, the backend seeds an admin user:
@@ -163,6 +188,8 @@ On first startup, the backend seeds an admin user:
 | `/api/admin/users` | GET | List all users |
 | `/api/admin/customers` | GET | List all customers |
 | `/api/admin/transactions` | GET | All transactions (paginated) |
+| `/api/admin/events` | GET | Audit events (paginated, filterable by aggregate type / severity) |
+| `/api/admin/events/stream` | GET | Real-time audit event stream (SSE) |
 
 ## Database Migrations
 
@@ -171,3 +198,23 @@ On first startup, the backend seeds an admin user:
 | V1 | Initial schema (accounts, customers, transactions, outbox_events) |
 | V2 | Users table for authentication |
 | V3 | Optimistic locking version columns |
+| V4 | Audit events table |
+
+## Deployment
+
+The live demo runs on a single AWS EC2 instance using the `docker-compose.yml` at the repo root. The stack:
+
+```
+          ┌──────────────────────── AWS EC2 (Ubuntu) ────────────────────────┐
+Internet ─┤ :80 / :443 → Caddy ─┬─ /api/*, /swagger-ui/*  →  backend:8080    │
+          │                     └─ /*                     →  frontend:3000  │
+          │                                                                  │
+          │            backend ──▶ postgres:5432   (Flyway-managed schema)   │
+          │            backend ──▶ rabbitmq:5672   (outbox → queues)         │
+          └──────────────────────────────────────────────────────────────────┘
+```
+
+- Caddy auto-provisions Let's Encrypt certificates on first start — no manual TLS setup
+- All secrets (DB password, JWT secret, RabbitMQ credentials) live in a gitignored `.env` file; see `.env.example` for the template
+- `restart: unless-stopped` on every service means the stack survives reboots
+- PostgreSQL and RabbitMQ state is persisted to named Docker volumes (`pgdata`, `rabbitdata`); Caddy's ACME state is persisted to `caddydata` so certificates survive container rebuilds
