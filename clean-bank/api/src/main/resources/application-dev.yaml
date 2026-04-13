@@ -2,6 +2,9 @@ spring:
   jpa:
     show-sql: true
 
+jwt:
+  secret-key: dev-only-insecure-secret-do-not-use-in-production-0123456789abcdef
+
 logging:
   level:
     org.springframework.security: DEBUG
