@@ -88,7 +88,7 @@ Infrastructure implements both: `JpaAccountWriteRepository` and `JpaAccountReadR
 
 ### Outbox Pattern
 
-`OutboxEvent` entities are persisted in the same transaction as aggregate saves. `OutboxProcessor` (stub, in progress) will relay them to RabbitMQ. `RabbitMqConfig` is also a stub pending implementation.
+`OutboxEvent` entities are persisted in the same transaction as aggregate saves. `OutboxProcessor` (@Scheduled every 5s) polls unprocessed events and relays them to RabbitMQ, then marks them as processed.
 
 ## Adding New Use Cases
 

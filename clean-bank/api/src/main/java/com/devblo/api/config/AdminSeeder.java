@@ -14,12 +14,14 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
+import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
 
 @Slf4j
 @Component
+@Order(1)
 @RequiredArgsConstructor
 public class AdminSeeder implements CommandLineRunner {
 
@@ -40,12 +42,14 @@ public class AdminSeeder implements CommandLineRunner {
         if (existingAdmin.isEmpty()) {
             log.info("Admin user not found. Seeding default admin user.");
 
+            String encodedPassword = passwordEncoderPort.encode(adminPass);
+
             var personalInfo = PersonalInfo.of(
                     "System",
                     "Admin",
                     adminEmail,
                     LocalDate.of(1990, 1, 1),
-                    passwordEncoderPort.encode(adminPass)
+                    encodedPassword
             );
 
             Address address = Address.of("System Street", "System District");
@@ -54,12 +58,12 @@ public class AdminSeeder implements CommandLineRunner {
 
             var adminUser = User.create(
                     Email.of(adminEmail),
-                    passwordEncoderPort.encode(adminPass),
+                    encodedPassword,
                     Role.ADMIN,
                     adminCustomer.getId());
             userWriteRepository.save(adminUser);
-            
-            log.info("Admin user created successfully with email: {} and password: {}", adminEmail, adminPass);
+
+            log.info("Admin user created successfully with email: {}", adminEmail);
         } else {
             log.info("Admin user already exists. Skipping seed.");
         }

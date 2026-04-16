@@ -8,6 +8,7 @@ import com.devblo.customer.event.CustomerPersonalInfoUpdatedEvent;
 import com.devblo.customer.event.CustomerRegisteredEvent;
 import com.devblo.customer.event.CustomerStatusChangedEvent;
 import com.devblo.infrastructure.events.audit.AuditEventPersistenceService;
+import com.devblo.transaction.event.TransactionCreatedEvent;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.event.TransactionPhase;
@@ -57,4 +58,8 @@ public class AuditEventListener {
         auditEventPersistenceService.saveAuditEvent(event, "customer", event.getCustomerId().value());
     }
 
+    @TransactionalEventListener(phase = TransactionPhase.BEFORE_COMMIT)
+    public void onTransactionCreated(TransactionCreatedEvent event) {
+        auditEventPersistenceService.saveAuditEvent(event, "transaction", event.getTransactionId().value());
+    }
 }

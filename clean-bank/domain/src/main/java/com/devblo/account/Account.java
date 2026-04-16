@@ -179,7 +179,7 @@ public class Account extends BaseAggregateRoot<AccountId> {
 
     private Result<Void> validateSufficientBalance(Money amount) {
         if (this.balance.isLessThan(amount)) {
-            return Result.failure("Amount must be greater than balance");
+            return Result.failure("Insufficient balance");
         }
         return Result.success();
     }

@@ -31,7 +31,7 @@ public class WithdrawMoneyCommandHandler implements ICommandHandler<WithdrawMone
                 .map(Result::success)
                 .orElseGet(() -> Result.failure("Account not found"));
         if (optAccount.isFailure()) {
-            return Result.failure("Account with id " + command.id() + " not found");
+            return Result.failure(optAccount.getError());
         }
 
         Account account = optAccount.getValue();

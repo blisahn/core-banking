@@ -44,13 +44,15 @@ public class CreateUserCommandHandler implements ICommandHandler<CreateUserComma
             return Result.failure("Cannot create CUSTOMER via admin endpoint. Use /api/auth/register or /api/employees/customers.");
         }
 
+        String encodedPassword = passwordEncoderPort.encode(command.password());
+
         // Generate dummy customer data for Staff
         var personalInfo = PersonalInfo.of(
                 "Staff",
                 "Member",
                 command.email(),
                 LocalDate.of(1990, 1, 1),
-                passwordEncoderPort.encode(command.password())
+                encodedPassword
         );
 
         Address address = Address.of("System Street", "System District");
@@ -59,7 +61,7 @@ public class CreateUserCommandHandler implements ICommandHandler<CreateUserComma
 
         var user = User.create(
                 Email.of(command.email()),
-                passwordEncoderPort.encode(command.password()),
+                encodedPassword,
                 role,
                 customer.getId()
         );

@@ -19,15 +19,14 @@ public class LoginCommandHandler implements ICommandHandler<LoginCommand, Result
 
     @Override
     public Result<AuthTokenDto> handle(LoginCommand command) {
-
         var userOpt = userWriteRepository.findByEmail(command.email());
         if (userOpt.isEmpty()) {
-            return Result.failure("Invalid email or password. ");
+            return Result.failure("Invalid email or password.");
         }
         var user = userOpt.get();
 
         if (!passwordEncoderPort.matches(command.password(), user.getPassword())) {
-            return Result.failure("Invalid email or password. ");
+            return Result.failure("Invalid email or password.");
         }
 
         String customerId = user.getCustomerId() != null

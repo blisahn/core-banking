@@ -45,7 +45,7 @@ public record Money(BigDecimal amount, Currency currency) implements ValueObject
         if (result.compareTo(BigDecimal.ZERO) < 0)
             throw new IllegalArgumentException("Amount cannot be negative: " + result);
 
-        return new Money(this.amount.subtract(other.amount), this.currency);
+        return new Money(result, this.currency);
     }
 
     public Money multiply(int multiplier) {

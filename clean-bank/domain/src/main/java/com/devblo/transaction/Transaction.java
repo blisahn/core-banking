@@ -80,6 +80,7 @@ public class Transaction extends BaseAggregateRoot<TransactionId> {
     public static Result<Transaction> withdraw(AccountId sourceAccountId, Money amount, String description) {
         Objects.requireNonNull(sourceAccountId, "SourceAccountId cannot be null");
         Objects.requireNonNull(amount, "Amount cannot be null");
+        Objects.requireNonNull(description, "Description cannot be null");
         if (isAmountInvalid(amount)) {
             return Result.failure("Withdraw amount must be greater than or equal to zero");
         }

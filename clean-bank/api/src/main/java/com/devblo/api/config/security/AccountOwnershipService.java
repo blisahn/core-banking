@@ -19,6 +19,7 @@ public class AccountOwnershipService {
     }
 
     public boolean isOwner(UUID accountId, UUID customerId) {
+        if (customerId == null) return false;
         Optional<Account> account = accountWriteRepository.findById(AccountId.of(accountId));
         return account.isPresent()
                 && account.get().getCustomerId().equals(CustomerId.of(customerId));

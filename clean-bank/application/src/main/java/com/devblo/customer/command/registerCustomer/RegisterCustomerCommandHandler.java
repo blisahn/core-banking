@@ -46,19 +46,21 @@ public class RegisterCustomerCommandHandler implements ICommandHandler<RegisterC
             return Result.failure("Customer with email " + command.email() + " already exists");
         }
 
+        String encodedPassword = passwordEncoderPort.encode(command.password());
+
         var personalInfo = PersonalInfo.of(
                 command.firstName(),
                 command.lastName(),
                 command.email(),
                 command.dateOfBirth(),
-                passwordEncoderPort.encode(command.password())
+                encodedPassword
         );
 
         Address address = Address.of(command.street(), command.district());
         var customer = Customer.register(personalInfo, address);
         var user = User.create(
                 Email.of(command.email()),
-                passwordEncoderPort.encode(command.password()),
+                encodedPassword,
                 Role.CUSTOMER,
                 customer.getId()
         );

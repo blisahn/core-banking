@@ -46,7 +46,8 @@ public class AccountController extends BaseController {
     @PostMapping
     public ResponseEntity<ApiResponse<AccountId>> openAccount(
             @RequestBody @Valid OpenAccountRequest request) {
-        if (!getAuthenticatedCustomerId().equals(request.customerId())) {
+        UUID authenticatedCustomerId = getAuthenticatedCustomerId();
+        if (authenticatedCustomerId == null || !authenticatedCustomerId.equals(request.customerId())) {
             return forbidden();
         }
         Result<AccountId> result = mediator.sendCommand(new OpenAccountCommand(
