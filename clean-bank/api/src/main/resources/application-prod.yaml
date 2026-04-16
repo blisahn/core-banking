@@ -8,4 +8,5 @@ cors:
 logging:
   level:
     org.springframework.security: WARN
-    com.devblo: WARN
+    com.devblo: INFO
+    org.flywaydb: WARN
