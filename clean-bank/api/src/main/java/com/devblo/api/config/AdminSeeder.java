@@ -38,34 +38,39 @@ public class AdminSeeder implements CommandLineRunner {
 
     @Override
     public void run(String... args) {
-        var existingAdmin = userReadRepository.findUserByEmail(adminEmail);
-        if (existingAdmin.isEmpty()) {
-            log.info("Admin user not found. Seeding default admin user.");
+        try {
+            var existingAdmin = userReadRepository.findUserByEmail(adminEmail);
+            if (existingAdmin.isEmpty()) {
+                log.warn("Admin user not found. Seeding default admin user.");
 
-            String encodedPassword = passwordEncoderPort.encode(adminPass);
+                String encodedPassword = passwordEncoderPort.encode(adminPass);
 
-            var personalInfo = PersonalInfo.of(
-                    "System",
-                    "Admin",
-                    adminEmail,
-                    LocalDate.of(1990, 1, 1),
-                    encodedPassword
-            );
+                var personalInfo = PersonalInfo.of(
+                        "System",
+                        "Admin",
+                        adminEmail,
+                        LocalDate.of(1990, 1, 1),
+                        encodedPassword
+                );
 
-            Address address = Address.of("System Street", "System District");
-            var adminCustomer = Customer.register(personalInfo, address);
-            customerWriteRepository.save(adminCustomer);
+                Address address = Address.of("System Street", "System District");
+                var adminCustomer = Customer.register(personalInfo, address);
+                customerWriteRepository.save(adminCustomer);
 
-            var adminUser = User.create(
-                    Email.of(adminEmail),
-                    encodedPassword,
-                    Role.ADMIN,
-                    adminCustomer.getId());
-            userWriteRepository.save(adminUser);
+                var adminUser = User.create(
+                        Email.of(adminEmail),
+                        encodedPassword,
+                        Role.ADMIN,
+                        adminCustomer.getId());
+                userWriteRepository.save(adminUser);
 
-            log.info("Admin user created successfully with email: {}", adminEmail);
-        } else {
-            log.info("Admin user already exists. Skipping seed.");
+                log.warn("Admin user created successfully with email: {}", adminEmail);
+            } else {
+                log.warn("Admin user already exists. Skipping seed.");
+            }
+        } catch (Exception e) {
+            log.error("AdminSeeder FAILED: {}", e.getMessage(), e);
+            throw e;
         }
     }
 }

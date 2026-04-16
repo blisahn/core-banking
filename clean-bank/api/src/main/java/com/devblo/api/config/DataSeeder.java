@@ -46,13 +46,14 @@ public class DataSeeder implements CommandLineRunner {
     @Override
     @Transactional
     public void run(String... args) {
-        if (userReadRepository.findUserByEmail(SEED_CHECK_EMAIL).isPresent()) {
-            log.info("Seed data already exists. Skipping.");
-            return;
-        }
+        try {
+            if (userReadRepository.findUserByEmail(SEED_CHECK_EMAIL).isPresent()) {
+                log.warn("Seed data already exists. Skipping.");
+                return;
+            }
 
-        log.info("Seeding demo data...");
-        String defaultPassword = passwordEncoderPort.encode("demo123");
+            log.warn("Seeding demo data...");
+            String defaultPassword = passwordEncoderPort.encode("demo123");
 
         // ─── Employee ────────────────────────────────────────────────
         seedEmployee("elif.yilmaz@cleanbank.com", "Elif", "Yılmaz",
@@ -131,7 +132,11 @@ public class DataSeeder implements CommandLineRunner {
                 transferAmount, "Borç ödemesi");
         transactionWriteRepository.save(tx.getValue());
 
-        log.info("Demo data seeded: 2 employees, 5 customers with accounts and transactions.");
+        log.warn("Demo data seeded: 2 employees, 5 customers with accounts and transactions.");
+        } catch (Exception e) {
+            log.error("DataSeeder FAILED: {}", e.getMessage(), e);
+            throw e;
+        }
     }
 
     private void seedEmployee(String email, String firstName, String lastName,
