@@ -6,13 +6,11 @@ import io.swagger.v3.oas.models.info.Contact;
 import io.swagger.v3.oas.models.info.Info;
 import io.swagger.v3.oas.models.security.SecurityRequirement;
 import io.swagger.v3.oas.models.security.SecurityScheme;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 
-@Configuration
+//@Configuration
 public class OpenApiConfig {
 
-    @Bean
+//    @Bean
     public OpenAPI bankingOpenAPI() {
         return new OpenAPI()
                 .info(new Info()
